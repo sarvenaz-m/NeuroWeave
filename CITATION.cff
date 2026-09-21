@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, cite this release and its documented validation scope."
+title: "NeuroWeave"
+version: 1.1.0
+date-released: 2026-09-21
+type: software
+license: MIT
+authors:
+  - name: "NeuroWeave contributors"
+abstract: "An EEG research console with synthetic signals, signal-quality checks, a compact CNN decoder, and cognitive interaction tasks."

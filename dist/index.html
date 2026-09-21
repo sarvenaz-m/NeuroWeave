@@ -1,0 +1,1988 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d18">
+  <meta name="description" content="NeuroWeave: a signal-decoding and interaction research console. Inspect synthetic EEG, compare a trained CNN with a spectral baseline, and run structured cognitive tasks.">
+  <title>NeuroWeave / Signal × Model × Interaction</title>
+  <style>@charset "UTF-8";
+:root {
+  --canvas:#080d18;--panel:#10192b;--raised:#162238;--ink:#f3f6fc;--muted:#a6b2c8;
+  --line:#2a3953;--blue:#6b9cff;--action:#2662e8;--orange:#ff9858;--ice:#91d7f2;
+  --mono:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;--target:112px;
+  font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--canvas);font-synthesis:none;
+}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:24px}body{margin:0;font-size:15px;line-height:1.65}
+button,input,select{font:inherit}button,a,select,input,summary{outline-offset:5px;touch-action:manipulation}
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--orange)}
+button{cursor:pointer}button:disabled{cursor:default}a{color:inherit}p{margin:.5em 0 1em}h1,h2,h3{margin:0;line-height:1.1;font-weight:700;letter-spacing:-.04em}
+h2{font-size:39px}h3{font-size:24px}.wrap{width:min(1320px,calc(100% - 88px));margin:auto}
+.site-header{display:flex;align-items:center;justify-content:space-between;gap:22px;padding:26px 0;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;font-size:21px;letter-spacing:.015em;font-weight:800;line-height:1.1}
+.brand-mark{width:45px;height:45px;padding:3px;flex-shrink:0;background:var(--action);fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:square;stroke-linejoin:miter}
+.brand small{display:block;font:8px/1.5 var(--mono);color:var(--muted);letter-spacing:.18em;margin-top:7px}
+.site-header nav{display:flex;gap:25px}.site-header nav a{text-decoration:none;font-size:12px;padding:12px 0;border-bottom:1px solid transparent}
+.site-header nav a span{font:10px var(--mono);color:var(--blue);margin-right:7px}.site-header nav a:hover{border-color:var(--blue)}
+.tag{display:inline-flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line);font:9px/1.5 var(--mono);letter-spacing:.07em;white-space:nowrap}
+.tag i{height:5px;width:5px;background:var(--orange)}.accent-tag{color:var(--blue);background:#142544;border-color:#35558d}
+.hero{display:grid;grid-template-columns:.92fr 1.08fr;align-items:center;gap:24px;padding:62px 0 42px;position:relative}
+.eyebrow{font:10px/1.6 var(--mono);letter-spacing:.1em;color:var(--muted);margin:0 0 18px}.index-mark{color:var(--orange);display:block;margin-bottom:7px}
+.hero h1{font-family:"Arial Black",Arial,Helvetica,sans-serif;font-size:clamp(68px,7.5vw,108px);font-weight:900;letter-spacing:-.065em;line-height:.92}
+.hero h1>span{color:var(--blue)}.lede{font-size:15px;line-height:1.85;max-width:470px;color:var(--muted);margin:28px 0 26px}
+.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.button{min-height:44px;padding:12px 17px;display:inline-flex;align-items:center;justify-content:center;gap:14px;border:1px solid #3d4d68;border-radius:3px;background:var(--raised);color:var(--ink);text-decoration:none;font-size:12px;font-weight:600;line-height:1.5}
+.button:hover:not(:disabled){border-color:var(--blue);background:#1d3152}.primary{background:var(--action);border-color:var(--action);color:#fff}.primary:hover:not(:disabled){background:#2e6ff9;border-color:#2e6ff9}.subtle{background:transparent}.button:disabled{opacity:.43}
+.byline{font:8px/1.9 var(--mono);letter-spacing:.035em;color:var(--muted);margin:22px 0 0}.byline span{color:var(--orange);padding:0 5px}
+.hero-art{min-width:0}.hero-art>svg,.hero-art>img{display:block;width:100%;height:auto}.art-caption{font:8px/1.7 var(--mono);letter-spacing:.05em;display:flex;justify-content:space-between;gap:10px;color:var(--muted);padding:12px 0;border-top:1px solid var(--line)}
+.principles{display:flex;align-items:center;justify-content:space-between;gap:25px;padding:23px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font:9px/1.6 var(--mono);color:var(--muted)}
+.principles b{font:26px/1 var(--mono);letter-spacing:-.06em;color:var(--ink);display:block;margin-bottom:9px}.small-note{max-width:165px;font:8px/1.9 var(--mono);color:var(--blue)}
+.section{padding-top:68px;padding-bottom:68px}.section-heading{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:28px}.section-heading .eyebrow{color:var(--orange);margin-bottom:13px}.section-heading h2{max-width:780px}.section-heading>p{font-size:12px;color:var(--muted);margin:0;flex-shrink:0}
+.signal-section{background:#0b1220;border-bottom:1px solid var(--line)}.signal-toolbar{display:flex;align-items:center;gap:17px;flex-wrap:wrap;border:1px solid var(--line);padding:16px;margin-bottom:18px;background:var(--panel)}
+.signal-toolbar label{display:flex;align-items:center;gap:10px;font:10px var(--mono);color:var(--muted)}select{width:100%;min-height:44px;border:1px solid #394b68;border-radius:3px;background:#0d1729;color:var(--ink);padding:9px 11px;font-size:12px}
+.signal-toolbar select{width:auto;min-width:155px}.signal-toolbar .button{margin-left:auto}.light-button{background:#172b49;border-color:#3d5a80;color:var(--ink)}
+.lab-grid{display:grid;grid-template-columns:1.65fr 1fr;gap:18px}.signal-panel{padding:24px;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--blue);min-width:0}.spectrum-panel{border-top-color:var(--orange)}
+.signal-panel h3{font:13px/1.5 var(--mono);letter-spacing:-.02em}.card-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.signal-panel .card-top{margin-bottom:17px}
+.mono{font:10px/1.5 var(--mono);color:var(--muted);letter-spacing:.025em}.signal-panel .mono{font-size:9px}.signal-panel svg{width:100%;height:auto;display:block;overflow:visible}.signal-caption{display:flex;justify-content:space-between;gap:8px;font:9px/1.6 var(--mono);color:var(--muted)}.spectrum-panel>h3{margin-bottom:17px}
+.hint{font-size:11px;line-height:1.7;color:var(--muted);margin:12px 0 0}.spectrum-panel .hint{font:9px/1.8 var(--mono)}
+.lab-results{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:18px}.result-cell{padding:24px 21px;background:var(--panel);min-width:0}
+.result-cell .eyebrow{font-size:9px;letter-spacing:.035em;margin-bottom:12px;color:var(--muted)}.result-cell h3{font:23px/1.25 var(--mono);color:var(--blue);letter-spacing:-.035em}.result-cell:nth-child(3) h3{color:var(--orange)}.result-cell h3 small{display:block;color:var(--muted);font-size:11px;margin-top:5px;letter-spacing:0}.result-cell p:not(.eyebrow){font-size:11px;margin:12px 0 0;color:var(--muted);line-height:1.75}
+#quality-label[data-state="blocked"]{color:var(--orange)}.lab-footer{display:flex;align-items:center;justify-content:space-between;gap:28px;margin-top:22px}.lab-footer .hint{max-width:520px;margin:0}.file-label{position:relative;overflow:hidden;cursor:pointer}.file-label input{position:absolute;inset:0;width:100%;opacity:0;cursor:pointer}.file-label:focus-within{outline:3px solid var(--orange);outline-offset:5px}.lab-note{font-size:10px;color:var(--muted);margin:25px 0 0;max-width:1050px;border-left:2px solid var(--orange);padding-left:13px}
+.studio-grid{display:grid;grid-template-columns:272px minmax(0,1fr);gap:22px;align-items:start}.settings-column{display:grid;gap:18px}.card{border:1px solid var(--line);background:var(--panel);border-radius:5px}.settings{padding:23px}.settings .eyebrow{font-size:9px;color:var(--blue)}.settings h3{font-size:24px;margin-bottom:22px}.settings label:not(.checkbox){display:block;font:10px/1.6 var(--mono);color:var(--muted);margin:15px 0 6px}.checkbox{display:flex;align-items:center;gap:9px;min-height:36px;margin:20px 0 10px;font-size:12px;cursor:pointer}.checkbox input{width:17px;height:17px;accent-color:var(--action)}
+.progress-card{padding:23px;background:#12233f;border-left:3px solid var(--blue)}.progress-card .eyebrow{font-size:9px}.big-number{font:52px/1 var(--mono);letter-spacing:-.075em}.big-number small{font:11px var(--mono);letter-spacing:0;color:var(--muted);margin-left:9px}.progress-track{height:5px;background:#2a3c5b;margin:23px 0;overflow:hidden}.progress-track span{height:100%;width:0;display:block;background:var(--blue)}.mini-metrics{margin:0;display:flex;justify-content:space-between;gap:10px}.mini-metrics dt{font-size:10px;color:var(--muted)}.mini-metrics dd{margin:6px 0 0;font:20px/1.2 var(--mono)}.note-card{font-size:11px;color:var(--muted);padding:4px 15px;border-left:2px solid var(--orange)}.note-card b{font-size:12px;color:var(--ink)}.note-card p{margin:7px 0;line-height:1.8}
+.game-card{padding:27px}.game-card h3{font-size:32px;letter-spacing:-.035em}.game-card>p{font-size:13px;color:var(--muted);line-height:1.8}.cue{font:13px/1.8 var(--mono);min-height:62px;padding:16px;border-left:3px solid var(--orange);background:#19253a;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--ink)}
+.board{position:relative;margin:20px 0;min-height:350px;background:linear-gradient(#20345155 1px,transparent 1px),linear-gradient(90deg,#20345155 1px,transparent 1px),#0b1322;background-size:24px 24px;border:1px solid var(--line);display:grid;grid-template-columns:var(--target) var(--target);grid-template-rows:var(--target) var(--target);place-content:center;gap:38px 130px;padding:26px 12px;overflow:hidden}
+.board::before,.board::after{content:"";position:absolute;width:25px;height:25px;pointer-events:none}.board::before{left:10px;top:10px;border-left:2px solid #536988;border-top:2px solid #536988}.board::after{right:10px;bottom:10px;border-right:2px solid #536988;border-bottom:2px solid #536988}
+.target{position:relative;width:var(--target);height:var(--target);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:9px;z-index:1;background:#152743;border:1px solid #466ba8;transition:transform .12s,box-shadow .12s}
+.target:enabled:hover{box-shadow:0 0 0 3px currentColor;transform:translateY(-2px)}.target:enabled:active{transform:scale(.96)}.target:disabled{opacity:.65}.target svg{width:42px;height:42px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:square;stroke-linejoin:miter}.target span{font:11px/1.2 var(--mono);font-weight:600}
+.node{color:#8eb6ff;background:#162c50;border-color:#5989d9}.pulse{color:#ffb683;background:#33241f;border-color:#a7653c}.phase{color:#a2e4fb;background:#122a39;border-color:#3e819b}.gate{color:#dee6f6;background:#242c3f;border-color:#8a9abb}.board-origin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:29px var(--mono);color:#647490}
+.play-controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.text-button{background:transparent;border-color:transparent;color:var(--muted);padding:8px 10px}.play-controls #timer{margin-left:auto;font-size:12px;color:var(--ice)}.game-status{min-height:26px;margin:18px 0 0!important;font-size:12px!important}.suggestion{background:#162c4b;border:1px solid #426ba5;padding:15px;margin-top:18px;font-size:12px}.suggestion p{margin:0 0 12px}
+.review{margin-top:22px;border-radius:0;padding:19px 24px;background:#0d1727}.review summary{font-size:16px;font-weight:600;min-height:30px;cursor:pointer}.review summary span{font:10px/1.6 var(--mono);color:var(--muted);margin-left:15px}.review-body{padding-top:10px}.table-wrap{overflow-x:auto;margin:18px 0}table{border-collapse:collapse;width:100%;white-space:nowrap;text-align:left;font-size:12px}th{font:10px/1.6 var(--mono);color:var(--muted);text-transform:uppercase}th,td{padding:11px 12px;border-bottom:1px solid var(--line)}
+#research{border-top:1px solid var(--line)}.lineage-grid{display:grid;gap:0}.lineage{display:grid;grid-template-columns:85px minmax(210px,1fr) 1.4fr;column-gap:28px;align-items:start;padding:31px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}.lineage .chapter{grid-row:1/3;grid-column:1;font:51px/1 var(--mono);color:var(--blue);letter-spacing:-.07em}.lineage .eyebrow{grid-column:2;grid-row:1;margin:0 0 9px;font-size:9px;color:var(--orange)}.lineage h3{grid-column:2;grid-row:2;font-size:28px}.lineage p:last-child{grid-column:3;grid-row:1/3;margin:0;font-size:13px;color:var(--muted);line-height:1.85}.research-strip{display:flex;justify-content:space-between;align-items:center;gap:35px;margin-top:24px;padding:30px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--blue)}.research-strip .eyebrow{font-size:9px;color:var(--blue);margin-bottom:13px}.research-strip h3{font-size:25px}.research-strip p{font-size:12px;line-height:1.8;color:var(--muted);margin-bottom:0;max-width:780px}.benchmark-result{min-width:200px;border-left:1px solid var(--line);padding-left:25px}.benchmark-result>span{font:26px/1.4 var(--mono);color:var(--orange);white-space:nowrap;letter-spacing:-.05em}.benchmark-result p{font:10px/1.8 var(--mono)}.footnote{font-size:11px;color:var(--muted);max-width:1100px;line-height:1.9;margin:24px 0 0}.site-footer{border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:24px;padding-top:28px;padding-bottom:30px}.site-footer .brand{display:block;font-size:20px}.site-footer small{margin-top:10px}.site-footer p{font:9px/1.9 var(--mono);color:var(--muted);margin:0}.site-footer>a{font:10px var(--mono);text-decoration:none;padding:12px 0;color:var(--blue)}
+.skip{position:absolute;top:5px;left:5px;transform:translateY(-160%);z-index:50;background:var(--action);padding:12px}.skip:focus{transform:none}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;clip:rect(0,0,0,0);overflow:hidden;white-space:nowrap}[hidden]{display:none!important}.reduce-motion *{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+@media(max-width:1150px){.wrap{width:calc(100% - 56px)}.site-header>.tag{display:none}.hero{gap:18px}.hero h1{font-size:82px}.hero .button{font-size:11px;padding:11px 13px}.studio-grid{grid-template-columns:250px minmax(0,1fr)}.board{column-gap:90px}.principles{gap:18px}.result-cell{padding:21px 17px}.signal-toolbar{gap:12px}.signal-toolbar .button{margin-left:0}.lineage{grid-template-columns:66px 1fr 1.25fr;column-gap:20px}.section-heading h2{font-size:34px}}
+@media(max-width:900px){.hero h1{font-size:68px}.hero-copy .eyebrow{font-size:8px}.lede{font-size:13px}.byline{font-size:7px}.site-header nav{gap:15px}.site-header nav a{font-size:11px}.brand{font-size:19px}.brand small{font-size:7px}.small-note{display:none}.lab-grid{grid-template-columns:1fr}.spectrum-panel svg{max-height:240px}.lab-results{grid-template-columns:1fr 1fr}.lab-footer{align-items:start;flex-direction:column;gap:16px}.studio-grid{grid-template-columns:1fr}.settings-column{display:grid;grid-template-columns:1fr 1fr}.settings-column .note-card{grid-column:2}.settings{grid-row:1/3}.progress-card{align-self:start}.game-card{grid-row:2}.section-heading>p{flex-shrink:1}.lineage{grid-template-columns:55px 1fr 1.2fr;column-gap:16px}.lineage h3{font-size:24px}.lineage p:last-child{font-size:12px}.research-strip{gap:22px}}
+@media(max-width:640px){.wrap{width:calc(100% - 32px)}.site-header{flex-wrap:wrap;padding:22px 0;gap:21px}.site-header nav{width:100%;justify-content:space-between;gap:10px}.site-header nav a{padding:7px 0;font-size:11px}.site-header nav a span{font-size:9px}.brand{font-size:21px}.hero{grid-template-columns:1fr;padding:40px 0 25px;gap:28px}.hero h1{font-size:clamp(66px,16vw,91px)}.hero-copy .eyebrow{font-size:9px}.lede{font-size:14px;max-width:460px}.hero .button{font-size:11px}.byline{font-size:7px}.hero-art{width:100%;max-width:490px;justify-self:center}.art-caption{font-size:7px}.principles{display:grid;grid-template-columns:1fr 1fr;gap:23px;padding:22px 0;font-size:9px}.principles b{font-size:27px}.section{padding-top:46px;padding-bottom:46px}.section-heading{display:block;margin-bottom:24px}.section-heading h2{font-size:32px;line-height:1.16}.section-heading>p{margin-top:16px;font-size:12px}.signal-toolbar{padding:14px;gap:15px}.signal-toolbar>.tag{margin-right:35%}.signal-toolbar label{width:100%;justify-content:space-between;font-size:10px}.signal-toolbar select{width:65%;min-width:0}.signal-panel{padding:17px 13px}.signal-panel .card-top{display:block}.signal-panel .mono{display:block;margin-top:9px}.signal-panel h3{font-size:12px}.result-cell{padding:18px 14px}.result-cell .eyebrow{font-size:8px;letter-spacing:0}.result-cell h3{font-size:20px}.result-cell p:not(.eyebrow){font-size:10px}.signal-caption{font-size:8px}.lab-footer .button{font-size:10px;padding:10px}.settings-column{grid-template-columns:1fr 1fr;gap:14px}.settings{grid-row:auto;grid-column:1/-1;padding:20px}.progress-card{grid-column:1/-1;padding:22px}.settings-column .note-card{grid-column:1/-1}.game-card{grid-row:2;padding:17px}.game-card .card-top{gap:9px;flex-wrap:wrap}.game-card h3{font-size:29px}.game-card>p{font-size:12px}.cue{padding:13px;font-size:12px}.board{column-gap:clamp(8px,3vw,20px);row-gap:32px;min-height:300px;padding:24px 8px}.target svg{width:36px;height:36px}.target span{font-size:10px}.play-controls{gap:5px}.play-controls .button{font-size:10px;padding:10px 11px}.play-controls .text-button{padding:10px 4px}.play-controls #timer{width:100%;margin-left:0;text-align:right;padding-top:6px}.review{padding:17px}.review summary span{display:block;margin:5px 0 0;font-size:9px}.lineage{grid-template-columns:45px 1fr;padding:25px 0;gap:0 16px}.lineage .chapter{font-size:38px}.lineage .eyebrow{font-size:8px}.lineage h3{font-size:27px}.lineage p:last-child{grid-column:2;grid-row:3;margin-top:16px;font-size:12px}.research-strip{flex-direction:column;align-items:start;padding:23px}.research-strip h3{font-size:24px}.benchmark-result{border-left:0;border-top:1px solid var(--line);padding-left:0;padding-top:18px;width:100%}.site-footer{align-items:start;flex-wrap:wrap}.site-footer p{flex-basis:100%}}
+</style>
+</head>
+<body>
+<a class="skip" href="#signals">Skip to the signal console</a>
+<header class="site-header wrap">
+  <a class="brand" href="#top" aria-label="NeuroWeave home"><svg class="brand-mark" viewBox="0 0 42 42" aria-hidden="true"><path d="M7 31V11l14 20V11m0 0 7 20 7-20"/></svg><span>NEUROWEAVE<small>SIGNAL / MODEL / INTERACTION</small></span></a>
+  <nav aria-label="Main navigation"><a href="#signals"><span>01</span> Signal console</a><a href="#studio"><span>02</span> Task bench</a><a href="#research"><span>03</span> Evidence</a></nav>
+  <span class="tag"><i></i> RESEARCH BUILD 1.1</span>
+</header>
+<main id="top">
+<section class="hero wrap" aria-labelledby="hero-title">
+  <div class="hero-copy"><p class="eyebrow"><span class="index-mark">NW / 001</span> SIGNAL &amp; INTERACTION EXPERIMENTS</p>
+    <h1 id="hero-title">TRACE.<br>DECODE.<br><span>INTERACT.</span></h1>
+    <p class="lede">Inspect the waveform. Challenge the model. Record the interaction. An independent research console connecting EEG decoding with cognitive task design.</p>
+    <div class="actions"><a class="button primary" href="#signals">Open signal console <span aria-hidden="true">↗</span></a><a class="button subtle" href="#studio">Run an interaction task</a></div>
+    <p class="byline">SYNTHETIC SIGNALS <span>/</span> REPRODUCIBLE EXPERIMENTS</p>
+  </div>
+  <div class="hero-art"><svg xmlns="http://www.w3.org/2000/svg" width="760" height="620" viewBox="0 0 760 620" role="img" aria-label="Original signal-processing lattice illustration"><defs><radialGradient id="core-glow"><stop stop-color="#2662e8" stop-opacity=".18"/><stop offset="1" stop-color="#2662e8" stop-opacity="0"/></radialGradient></defs><ellipse cx="433" cy="298" rx="317" ry="290" fill="url(#core-glow)"/><path d="M30 45L30 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M70 45L70 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M110 45L110 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M150 45L150 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M190 45L190 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M230 45L230 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M270 45L270 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M310 45L310 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M350 45L350 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M390 45L390 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M430 45L430 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M470 45L470 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M510 45L510 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M550 45L550 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M590 45L590 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M630 45L630 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M670 45L670 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M710 45L710 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M750 45L750 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 52L743 52" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 92L743 92" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 132L743 132" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 172L743 172" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 212L743 212" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 252L743 252" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 292L743 292" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 332L743 332" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 372L743 372" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 412L743 412" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 452L743 452" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 492L743 492" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 532L743 532" fill="none" stroke="#152238" stroke-width="1" /><path d="M25 572L743 572" fill="none" stroke="#152238" stroke-width="1" /><path d="M44 38H24V58" fill="none" stroke="#526583"/><path d="M724 38H744V58" fill="none" stroke="#526583"/><path d="M44 583H24V563" fill="none" stroke="#526583"/><path d="M724 583H744V563" fill="none" stroke="#526583"/><text x="39" y="67" font-family="DejaVu Sans, sans-serif" font-size="10" fill="#6b9cff" font-weight="normal" >NW / SIGNAL LATTICE</text><text x="554" y="67" font-family="DejaVu Sans, sans-serif" font-size="9" fill="#a6b2c8" font-weight="normal" >SYNTHETIC INPUT</text><rect x="40" y="158" width="164" height="262" fill="#0d1729" stroke="#344c72"/><text x="53" y="184" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#f3f6fc" font-weight="normal" >INPUT / 08 CH</text><polyline points="54.0,217.0 55.0,219.6 56.0,221.9 57.0,223.5 58.0,224.3 59.0,224.4 60.0,223.9 61.0,223.1 62.0,222.3 63.0,221.9 64.0,222.0 65.0,222.6 66.0,223.6 67.0,224.7 68.0,225.5 69.0,225.9 70.0,225.4 71.0,224.1 72.0,222.1 73.0,219.6 74.0,217.0 75.0,214.6 76.0,212.8 77.0,211.7 78.0,211.3 79.0,211.5 80.0,212.0 81.0,212.5 82.0,212.8 83.0,212.5 84.0,211.7 85.0,210.5 86.0,209.1 87.0,207.9 88.0,207.1 89.0,207.2 90.0,208.0 91.0,209.7 92.0,211.9 93.0,214.4 94.0,216.8 95.0,218.8 96.0,220.1 97.0,220.7 98.0,220.7 99.0,220.4 100.0,220.1 101.0,220.0 102.0,220.4 103.0,221.3 104.0,222.7 105.0,224.4 106.0,226.0 107.0,227.2 108.0,227.7 109.0,227.3 110.0,226.1 111.0,224.2 112.0,221.9 113.0,219.6 114.0,217.6 115.0,216.2 116.0,215.4 117.0,215.2 118.0,215.4 119.0,215.7 120.0,215.7 121.0,215.3 122.0,214.2 123.0,212.6 124.0,210.7 125.0,208.8 126.0,207.2 127.0,206.2 128.0,206.1 129.0,206.8 130.0,208.3 131.0,210.3 132.0,212.4 133.0,214.3 134.0,215.7 135.0,216.5 136.0,216.7 137.0,216.6 138.0,216.3 139.0,216.3 140.0,216.7 141.0,217.8 142.0,219.5 143.0,221.6 144.0,223.8 145.0,225.8 146.0,227.2 147.0,227.9 148.0,227.6 149.0,226.6 150.0,225.0 151.0,223.1 152.0,221.4 153.0,220.1 154.0,219.3 155.0,219.1 156.0,219.3 157.0,219.7 158.0,219.8 159.0,219.4 160.0,218.5 161.0,216.8 162.0,214.6 163.0,212.2 164.0,209.9 165.0,208.0 166.0,206.9 167.0,206.7 168.0,207.2 169.0,208.4 170.0,209.9 171.0,211.4 172.0,212.6 173.0,213.2 174.0,213.3 175.0,213.0 176.0,212.6 177.0,212.2 178.0,212.4 179.0,213.2 180.0,214.7 181.0,216.9 182.0,219.4 183.0,221.9 184.0,224.1" fill="none" stroke="#6b9cff" stroke-width="1.5"/><polyline points="54.0,253.7 55.0,255.9 56.0,257.6 57.0,258.6 58.0,258.7 59.0,257.9 60.0,256.5 61.0,254.8 62.0,253.2 63.0,251.8 64.0,251.0 65.0,250.8 66.0,250.9 67.0,251.3 68.0,251.6 69.0,251.4 70.0,250.5 71.0,249.0 72.0,246.9 73.0,244.4 74.0,242.0 75.0,239.9 76.0,238.5 77.0,238.0 78.0,238.2 79.0,239.2 80.0,240.5 81.0,241.9 82.0,243.1 83.0,243.7 84.0,243.9 85.0,243.6 86.0,243.0 87.0,242.6 88.0,242.6 89.0,243.2 90.0,244.5 91.0,246.6 92.0,249.0 93.0,251.6 94.0,254.0 95.0,255.8 96.0,256.8 97.0,257.0 98.0,256.4 99.0,255.5 100.0,254.3 101.0,253.4 102.0,252.9 103.0,252.9 104.0,253.4 105.0,254.2 106.0,254.9 107.0,255.2 108.0,254.9 109.0,253.8 110.0,252.0 111.0,249.6 112.0,247.0 113.0,244.4 114.0,242.4 115.0,241.0 116.0,240.4 117.0,240.6 118.0,241.2 119.0,242.0 120.0,242.7 121.0,243.0 122.0,242.8 123.0,242.1 124.0,241.1 125.0,240.1 126.0,239.4 127.0,239.4 128.0,240.1 129.0,241.6 130.0,243.8 131.0,246.4 132.0,249.0 133.0,251.2 134.0,252.8 135.0,253.7 136.0,253.9 137.0,253.6 138.0,253.0 139.0,252.5 140.0,252.4 141.0,252.7 142.0,253.6 143.0,254.9 144.0,256.2 145.0,257.3 146.0,257.8 147.0,257.5 148.0,256.4 149.0,254.5 150.0,252.1 151.0,249.6 152.0,247.3 153.0,245.5 154.0,244.4 155.0,244.0 156.0,244.1 157.0,244.5 158.0,244.8 159.0,244.8 160.0,244.3 161.0,243.2 162.0,241.7 163.0,240.1 164.0,238.6 165.0,237.6 166.0,237.4 167.0,238.1 168.0,239.6 169.0,241.7 170.0,244.0 171.0,246.3 172.0,248.1 173.0,249.4 174.0,249.9 175.0,250.0 176.0,249.7 177.0,249.5 178.0,249.6 179.0,250.2 180.0,251.4 181.0,253.0 182.0,255.0 183.0,256.8 184.0,258.2" fill="none" stroke="#91d7f2" stroke-width="1.5"/><polyline points="54.0,287.0 55.0,288.3 56.0,289.1 57.0,289.1 58.0,288.2 59.0,286.6 60.0,284.4 61.0,281.9 62.0,279.6 63.0,277.7 64.0,276.4 65.0,275.8 66.0,275.8 67.0,276.1 68.0,276.4 69.0,276.4 70.0,275.9 71.0,274.9 72.0,273.4 73.0,271.6 74.0,270.0 75.0,268.7 76.0,268.2 77.0,268.6 78.0,269.8 79.0,271.6 80.0,273.9 81.0,276.1 82.0,278.0 83.0,279.4 84.0,280.1 85.0,280.2 86.0,280.0 87.0,279.8 88.0,279.8 89.0,280.3 90.0,281.4 91.0,283.1 92.0,285.1 93.0,287.1 94.0,288.8 95.0,289.8 96.0,290.0 97.0,289.2 98.0,287.8 99.0,285.9 100.0,283.8 101.0,282.0 102.0,280.7 103.0,280.0 104.0,279.8 105.0,280.0 106.0,280.2 107.0,280.2 108.0,279.7 109.0,278.6 110.0,276.9 111.0,274.7 112.0,272.4 113.0,270.4 114.0,268.9 115.0,268.2 116.0,268.5 117.0,269.5 118.0,271.0 119.0,272.8 120.0,274.4 121.0,275.6 122.0,276.3 123.0,276.4 124.0,276.2 125.0,275.8 126.0,275.7 127.0,276.1 128.0,277.1 129.0,278.8 130.0,281.0 131.0,283.5 132.0,285.8 133.0,287.7 134.0,288.9 135.0,289.1 136.0,288.6 137.0,287.5 138.0,286.0 139.0,284.6 140.0,283.6 141.0,283.0 142.0,283.0 143.0,283.4 144.0,283.9 145.0,284.2 146.0,284.1 147.0,283.3 148.0,281.7 149.0,279.5 150.0,276.9 151.0,274.4 152.0,272.2 153.0,270.6 154.0,269.9 155.0,270.0 156.0,270.7 157.0,271.8 158.0,272.9 159.0,273.8 160.0,274.2 161.0,274.0 162.0,273.5 163.0,272.7 164.0,272.1 165.0,272.0 166.0,272.5 167.0,273.9 168.0,275.9 169.0,278.4 170.0,281.1 171.0,283.5 172.0,285.3 173.0,286.5 174.0,286.8 175.0,286.4 176.0,285.7 177.0,284.8 178.0,284.2 179.0,284.0 180.0,284.3 181.0,285.1 182.0,286.1 183.0,287.0 184.0,287.5" fill="none" stroke="#6b9cff" stroke-width="1.5"/><polyline points="54.0,315.4 55.0,315.9 56.0,315.9 57.0,315.3 58.0,313.9 59.0,311.8 60.0,309.3 61.0,306.7 62.0,304.4 63.0,302.6 64.0,301.6 65.0,301.4 66.0,301.9 67.0,302.8 68.0,303.8 69.0,304.6 70.0,305.0 71.0,304.9 72.0,304.3 73.0,303.5 74.0,302.7 75.0,302.4 76.0,302.7 77.0,303.8 78.0,305.6 79.0,308.0 80.0,310.7 81.0,313.2 82.0,315.2 83.0,316.6 84.0,317.2 85.0,317.0 86.0,316.4 87.0,315.7 88.0,315.1 89.0,314.9 90.0,315.2 91.0,316.0 92.0,317.1 93.0,318.2 94.0,318.9 95.0,319.0 96.0,318.3 97.0,316.7 98.0,314.6 99.0,312.0 100.0,309.4 101.0,307.2 102.0,305.6 103.0,304.7 104.0,304.6 105.0,304.9 106.0,305.4 107.0,305.8 108.0,305.9 109.0,305.4 110.0,304.4 111.0,303.0 112.0,301.6 113.0,300.5 114.0,299.9 115.0,300.2 116.0,301.3 117.0,303.2 118.0,305.5 119.0,308.0 120.0,310.3 121.0,312.0 122.0,313.1 123.0,313.5 124.0,313.4 125.0,313.0 126.0,312.8 127.0,312.8 128.0,313.5 129.0,314.6 130.0,316.2 131.0,318.0 132.0,319.5 133.0,320.5 134.0,320.7 135.0,320.1 136.0,318.6 137.0,316.6 138.0,314.3 139.0,312.1 140.0,310.3 141.0,309.1 142.0,308.6 143.0,308.6 144.0,308.8 145.0,309.0 146.0,308.9 147.0,308.2 148.0,306.9 149.0,305.2 150.0,303.2 151.0,301.2 152.0,299.8 153.0,299.1 154.0,299.2 155.0,300.2 156.0,301.9 157.0,303.9 158.0,305.9 159.0,307.6 160.0,308.8 161.0,309.4 162.0,309.4 163.0,309.2 164.0,309.0 165.0,309.1 166.0,309.8 167.0,311.1 168.0,312.9 169.0,315.1 170.0,317.4 171.0,319.2 172.0,320.5 173.0,320.8 174.0,320.3 175.0,319.1 176.0,317.4 177.0,315.6 178.0,314.1 179.0,313.0 180.0,312.4 181.0,312.4 182.0,312.7 183.0,313.0 184.0,313.0" fill="none" stroke="#91d7f2" stroke-width="1.5"/><polyline points="54.0,340.5 55.0,340.8 56.0,340.7 57.0,340.1 58.0,338.9 59.0,337.1 60.0,335.1 61.0,333.0 62.0,331.3 63.0,330.2 64.0,330.1 65.0,330.7 66.0,332.2 67.0,334.0 68.0,336.0 69.0,337.7 70.0,338.9 71.0,339.6 72.0,339.7 73.0,339.5 74.0,339.2 75.0,339.3 76.0,339.8 77.0,341.0 78.0,342.8 79.0,345.0 80.0,347.4 81.0,349.4 82.0,350.9 83.0,351.6 84.0,351.4 85.0,350.5 86.0,349.0 87.0,347.3 88.0,345.8 89.0,344.6 90.0,344.1 91.0,344.0 92.0,344.3 93.0,344.7 94.0,344.8 95.0,344.4 96.0,343.4 97.0,341.6 98.0,339.3 99.0,336.8 100.0,334.4 101.0,332.5 102.0,331.4 103.0,331.1 104.0,331.6 105.0,332.7 106.0,334.0 107.0,335.3 108.0,336.3 109.0,336.7 110.0,336.6 111.0,336.2 112.0,335.6 113.0,335.3 114.0,335.4 115.0,336.3 116.0,337.9 117.0,340.1 118.0,342.7 119.0,345.3 120.0,347.5 121.0,349.0 122.0,349.8 123.0,349.7 124.0,349.0 125.0,348.0 126.0,346.9 127.0,346.2 128.0,345.9 129.0,346.2 130.0,346.8 131.0,347.6 132.0,348.3 133.0,348.4 134.0,347.9 135.0,346.5 136.0,344.5 137.0,342.0 138.0,339.3 139.0,336.9 140.0,335.1 141.0,333.9 142.0,333.6 143.0,333.9 144.0,334.7 145.0,335.4 146.0,336.0 147.0,336.1 148.0,335.6 149.0,334.7 150.0,333.7 151.0,332.7 152.0,332.2 153.0,332.3 154.0,333.3 155.0,335.1 156.0,337.4 157.0,340.0 158.0,342.5 159.0,344.6 160.0,346.0 161.0,346.6 162.0,346.6 163.0,346.1 164.0,345.6 165.0,345.2 166.0,345.3 167.0,345.9 168.0,347.0 169.0,348.4 170.0,349.7 171.0,350.7 172.0,351.0 173.0,350.4 174.0,349.0 175.0,347.0 176.0,344.5 177.0,342.0 178.0,339.9 179.0,338.3 180.0,337.5 181.0,337.3 182.0,337.5 183.0,337.9 184.0,338.1" fill="none" stroke="#6b9cff" stroke-width="1.5"/><polyline points="54.0,365.9 55.0,366.6 56.0,367.2 57.0,367.3 58.0,366.8 59.0,365.9 60.0,364.7 61.0,363.6 62.0,362.8 63.0,362.7 64.0,363.4 65.0,364.9 66.0,367.1 67.0,369.6 68.0,372.2 69.0,374.4 70.0,375.9 71.0,376.8 72.0,376.9 73.0,376.6 74.0,376.2 75.0,375.8 76.0,375.9 77.0,376.5 78.0,377.6 79.0,379.0 80.0,380.5 81.0,381.7 82.0,382.3 83.0,382.0 84.0,380.9 85.0,379.1 86.0,376.8 87.0,374.3 88.0,372.1 89.0,370.4 90.0,369.4 91.0,369.0 92.0,369.1 93.0,369.5 94.0,369.7 95.0,369.5 96.0,368.8 97.0,367.6 98.0,365.9 99.0,364.1 100.0,362.5 101.0,361.4 102.0,361.2 103.0,361.8 104.0,363.2 105.0,365.2 106.0,367.5 107.0,369.6 108.0,371.3 109.0,372.4 110.0,372.9 111.0,372.9 112.0,372.6 113.0,372.5 114.0,372.7 115.0,373.4 116.0,374.8 117.0,376.6 118.0,378.7 119.0,380.7 120.0,382.2 121.0,382.9 122.0,382.8 123.0,381.9 124.0,380.2 125.0,378.3 126.0,376.3 127.0,374.7 128.0,373.6 129.0,373.1 130.0,373.1 131.0,373.4 132.0,373.6 133.0,373.4 134.0,372.7 135.0,371.3 136.0,369.4 137.0,367.1 138.0,364.8 139.0,362.9 140.0,361.7 141.0,361.3 142.0,361.7 143.0,362.9 144.0,364.5 145.0,366.3 146.0,367.7 147.0,368.7 148.0,369.2 149.0,369.1 150.0,368.8 151.0,368.5 152.0,368.5 153.0,369.1 154.0,370.3 155.0,372.3 156.0,374.6 157.0,377.1 158.0,379.4 159.0,381.0 160.0,381.9 161.0,381.9 162.0,381.2 163.0,380.0 164.0,378.6 165.0,377.3 166.0,376.4 167.0,376.1 168.0,376.3 169.0,376.8 170.0,377.3 171.0,377.5 172.0,377.2 173.0,376.1 174.0,374.3 175.0,371.9 176.0,369.3 177.0,366.8 178.0,364.8 179.0,363.5 180.0,363.0 181.0,363.3 182.0,364.2 183.0,365.3 184.0,366.3" fill="none" stroke="#91d7f2" stroke-width="1.5"/><text x="52" y="404" font-family="DejaVu Sans, sans-serif" font-size="10" fill="#a6b2c8" font-weight="normal" >128 Hz / 2 s</text><polygon points="390,142 662,282 478,506 206,366" fill="#10192b" fill-opacity=".82" stroke="#315589" stroke-width="1"/><polygon points="390,122 662,262 478,486 206,346" fill="#10192b" fill-opacity=".82" stroke="#315589" stroke-width="1"/><polygon points="390,102 662,242 478,466 206,326" fill="#10192b" fill-opacity=".82" stroke="#6b9cff" stroke-width="1.6"/><path d="M424.0 119.5L240.0 343.5" fill="none" stroke="#345c96" stroke-width="1" /><path d="M367.0 130.0L639.0 270.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M458.0 137.0L274.0 361.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M344.0 158.0L616.0 298.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M492.0 154.5L308.0 378.5" fill="none" stroke="#345c96" stroke-width="1" /><path d="M321.0 186.0L593.0 326.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M526.0 172.0L342.0 396.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M298.0 214.0L570.0 354.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M560.0 189.5L376.0 413.5" fill="none" stroke="#345c96" stroke-width="1" /><path d="M275.0 242.0L547.0 382.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M594.0 207.0L410.0 431.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M252.0 270.0L524.0 410.0" fill="none" stroke="#345c96" stroke-width="1" /><path d="M628.0 224.5L444.0 448.5" fill="none" stroke="#345c96" stroke-width="1" /><path d="M229.0 298.0L501.0 438.0" fill="none" stroke="#345c96" stroke-width="1" /><circle cx="401.00" cy="147.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="435.00" cy="165.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="469.00" cy="182.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="503.00" cy="200.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="537.00" cy="217.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="537.00" cy="217.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="571.00" cy="235.00" r="8" fill="#6b9cff" opacity=".15"/><circle cx="571.00" cy="235.00" r="3.2" fill="#ff9858" opacity="1"/><circle cx="605.00" cy="252.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="378.00" cy="175.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="412.00" cy="193.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="446.00" cy="210.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="446.00" cy="210.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="480.00" cy="228.00" r="8" fill="#6b9cff" opacity=".15"/><circle cx="480.00" cy="228.00" r="3.2" fill="#ff9858" opacity="1"/><circle cx="514.00" cy="245.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="548.00" cy="263.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="582.00" cy="280.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="355.00" cy="203.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="355.00" cy="203.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="389.00" cy="221.00" r="8" fill="#6b9cff" opacity=".15"/><circle cx="389.00" cy="221.00" r="3.2" fill="#ff9858" opacity="1"/><circle cx="423.00" cy="238.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="457.00" cy="256.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="491.00" cy="273.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="525.00" cy="291.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="559.00" cy="308.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="332.00" cy="231.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="366.00" cy="249.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="400.00" cy="266.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="434.00" cy="284.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="468.00" cy="301.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="502.00" cy="319.00" r="8" fill="#6b9cff" opacity=".15"/><circle cx="502.00" cy="319.00" r="3.2" fill="#ff9858" opacity="1"/><circle cx="536.00" cy="336.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="536.00" cy="336.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="309.00" cy="259.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="343.00" cy="277.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="377.00" cy="294.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="411.00" cy="312.00" r="8" fill="#6b9cff" opacity=".15"/><circle cx="411.00" cy="312.00" r="3.2" fill="#ff9858" opacity="1"/><circle cx="445.00" cy="329.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="445.00" cy="329.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="479.00" cy="347.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="513.00" cy="364.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="286.00" cy="287.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="320.00" cy="305.00" r="8" fill="#6b9cff" opacity=".15"/><circle cx="320.00" cy="305.00" r="3.2" fill="#ff9858" opacity="1"/><circle cx="354.00" cy="322.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="354.00" cy="322.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="388.00" cy="340.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="422.00" cy="357.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="456.00" cy="375.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="490.00" cy="392.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="263.00" cy="315.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="263.00" cy="315.50" r="3.2" fill="#ff9858" opacity="1"/><circle cx="297.00" cy="333.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="331.00" cy="350.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="365.00" cy="368.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="399.00" cy="385.50" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="433.00" cy="403.00" r="1.6" fill="#6b9cff" opacity="0.65"/><circle cx="467.00" cy="420.50" r="8" fill="#6b9cff" opacity=".15"/><circle cx="467.00" cy="420.50" r="3.2" fill="#ff9858" opacity="1"/><polyline points="308.6,257.7 379.3,294.1 425.3,238.1 493.3,273.1 428.9,351.5 496.9,386.5" fill="none" stroke="#ff9858" stroke-width="3"/><rect x="304.6" y="253.7" width="8" height="8" fill="#ff9858"/><rect x="492.9" y="382.5" width="8" height="8" fill="#ff9858"/><path d="M184 346H204L236 364M532 397L578 432H675V463" fill="none" stroke="#ff9858" stroke-width="2"/><rect x="571" y="463" width="154" height="72" fill="#201c1c" stroke="#ff9858"/><text x="588" y="488" font-family="DejaVu Sans, sans-serif" font-size="11" fill="#ff9858" font-weight="normal" >OUTPUT / A : B</text><rect x="588" y="500" width="80" height="5" fill="#ff9858"/><rect x="588" y="513" width="34" height="5" fill="#8f593a"/><text x="237" y="527" font-family="DejaVu Sans, sans-serif" font-size="10" fill="#6b9cff" font-weight="normal" >CONVOLUTION / LATENT FEATURES</text><text x="237" y="548" font-family="DejaVu Sans, sans-serif" font-size="10" fill="#a6b2c8" font-weight="normal" >1,114 trainable parameters</text><text x="39" y="568" font-family="DejaVu Sans, sans-serif" font-size="8" fill="#a6b2c8" font-weight="normal" >ILLUSTRATION / NOT AN ACQUISITION DISPLAY</text></svg><div class="art-caption"><span>FIG. 01 / SIGNAL LATTICE</span><span>ILLUSTRATIVE · NOT ACQUIRED EEG</span></div></div>
+</section>
+<div class="principles wrap"><span><b>08</b> SIGNAL CHANNELS</span><span><b>128</b> SAMPLES / SECOND</span><span><b>1,114</b> MODEL PARAMETERS</span><span><b>02</b> INTERACTION TASKS</span><span class="small-note">SYNTHETIC EEG / LOCAL ANALYSIS</span></div>
+
+<section class="signal-section" id="signals" aria-labelledby="signal-title"><div class="wrap section">
+  <div class="section-heading"><div><p class="eyebrow">01 / SIGNAL CONSOLE</p><h2 id="signal-title">Inspect the input. Audit the output.</h2></div><p>Replay artificial conditions, inject an artefact,<br>and see when the decoder abstains.</p></div>
+  <div class="signal-toolbar"><span class="tag accent-tag" id="source-label">SYNTHETIC EEG</span><label>Condition <select id="condition"><option value="0">A · 10 Hz component</option><option value="1">B · 20 Hz component</option></select></label><label>Signal quality <select id="artifact"><option value="clean">Clean example</option><option value="spike">Amplitude artefact</option><option value="flat">Flat channel</option></select></label><button class="button light-button" id="new-window">Generate window ↻</button></div>
+  <div class="lab-grid"><div class="signal-panel"><div class="card-top"><h3>Input buffer / 8 channels</h3><span class="mono" id="seed-label">128 Hz / 2 seconds</span></div><svg id="waveform" viewBox="0 0 680 282" role="img" aria-label="Eight channel EEG waveform"></svg><div class="signal-caption"><span id="wave-caption">Artificial samples in microvolts</span><span>Time (s) →</span></div></div>
+    <div class="signal-panel spectrum-panel"><h3>Spectral view / 0–40 Hz</h3><svg id="spectrum" viewBox="0 0 360 245" role="img" aria-label="Power spectral density"></svg><p class="hint">Hann periodogram · channel average · µV²/Hz</p></div></div>
+  <div class="lab-results"><div class="result-cell"><p class="eyebrow">QUALITY GATE</p><h3 id="quality-label">Checking…</h3><p id="quality-detail"></p></div><div class="result-cell"><p class="eyebrow">DECODER / TEMPORAL CNN</p><h3 id="prediction">—</h3><p id="prediction-detail"></p></div><div class="result-cell"><p class="eyebrow">REFERENCE / SPECTRAL</p><h3 id="baseline">—</h3><p id="baseline-detail"></p></div><div class="result-cell"><p class="eyebrow">MODEL SPECIFICATION</p><h3>1,114 <small>parameters</small></h3><p>Learned filters, ReLU, temporal pooling and a two-class head.</p></div></div>
+  <div class="lab-footer"><div class="actions"><button class="button light-button" id="export-window">Export EEG window</button><label class="button light-button file-label">Import EEG JSON<input id="import-window" type="file" accept=".json,application/json"></label></div><p class="hint">Imported data stays in your browser. Classification is disabled for imports because this model was trained only on artificial signals.</p></div><p role="status" id="import-status" class="hint"></p>
+  <p class="lab-note">Demo quality thresholds are engineering checks, not validated EEG acquisition criteria. Conditions A/B are artificial frequency patterns, not attention, intention, recovery or diagnosis.</p>
+</div></section>
+
+
+<section class="wrap section" id="studio" aria-labelledby="studio-title">
+  <div class="section-heading"><div><p class="eyebrow">02 / INTERACTION BENCH</p><h2 id="studio-title">Observe each interaction.</h2></div><p>Two controlled tasks. Eight trials per run.<br>Pointer, touch or keyboard input.</p></div>
+  <div class="studio-grid">
+    <aside class="settings-column">
+      <div class="card settings"><p class="eyebrow">RUN CONFIGURATION</p><h3>Set the parameters.</h3>
+        <label for="mode">Task module</label><select id="mode"><option value="memory">Sequence Buffer</option><option value="switch">Rule Router</option></select>
+        <label for="level">Buffer length</label><select id="level"><option value="2">2 symbols</option><option value="3">3 symbols</option><option value="4">4 symbols</option></select>
+        <label for="target-size">Response pad size</label><select id="target-size"><option value="88">Standard · 88 px</option><option value="112" selected>Expanded · 112 px</option></select>
+        <label class="checkbox"><input type="checkbox" id="reduce-motion" checked> Reduce movement</label>
+        <p class="hint">Keyboard: Tab through controls; use 1–4 for targets. No response deadline.</p>
+      </div>
+      <div class="card progress-card"><p class="eyebrow">RUN TELEMETRY</p><div class="big-number"><span id="completed">0</span><small>/ 8 trials</small></div><div class="progress-track"><span id="progress-fill"></span></div><dl class="mini-metrics"><div><dt>Matched trials</dt><dd id="correct">—</dd></div><div><dt>Median response</dt><dd id="median">—</dd></div></dl><p class="hint">These describe this session only. They are not a health assessment.</p></div>
+      <div class="note-card"><b>Operator-controlled settings</b><p>Buffer-length changes need your confirmation. Signal classification is logged independently of task difficulty.</p></div>
+    </aside>
+    <div class="card game-card">
+      <div class="card-top"><span class="tag accent-tag">INTERACTION MODULE</span><span id="round-label" class="mono">AWAITING RUN</span></div>
+      <h3 id="game-title">Sequence Buffer</h3><p id="game-instruction">Memorise the symbol buffer, then reproduce its order on the response pads.</p>
+      <div id="cue" class="cue" aria-live="polite">Configure the run, then load the first trial.</div>
+      <div id="board" class="board" aria-label="Four response pads">
+        <button data-target="0" class="target node" disabled><svg viewBox="0 0 60 60" aria-hidden="true"><rect x="11" y="11" width="38" height="38"/><circle cx="30" cy="30" r="8"/><path d="M30 5v6m0 38v6M5 30h6m38 0h6"/></svg><span>1 · Node</span></button>
+        <button data-target="1" class="target pulse" disabled><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M5 33h11V16h11v28h11V26h17"/></svg><span>2 · Pulse</span></button>
+        <button data-target="2" class="target phase" disabled><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M5 20q12-16 25 0t25 0M5 33q12-16 25 0t25 0M5 46q12-16 25 0t25 0"/></svg><span>3 · Phase</span></button>
+        <button data-target="3" class="target gate" disabled><svg viewBox="0 0 60 60" aria-hidden="true"><path d="M30 7 53 30 30 53 7 30Z M22 22h16v16H22Z"/></svg><span>4 · Gate</span></button>
+        <span class="board-origin" aria-hidden="true">+</span>
+      </div>
+      <div class="play-controls"><button class="button primary" id="advance">Load first trial <span aria-hidden="true">→</span></button><button class="button subtle" id="pause" disabled>Pause</button><button class="button text-button" id="stop" disabled>End run</button><span id="timer" class="mono" aria-label="Active response time">0.0 s</span></div>
+      <p class="game-status" id="game-status" role="status">8 trials / self-paced response / pause or finish at any point.</p>
+      <div class="suggestion" id="suggestion" hidden><p id="suggestion-text"></p><button class="button" id="accept-suggestion">Apply buffer length</button></div>
+    </div>
+
+  </div>
+  <details class="card review"><summary>Run ledger <span>Review completed trials / export JSON or CSV</span></summary><div class="review-body"><p class="hint">Exports contain your local game interactions, settings and demo signal observations. No names or contact information are requested.</p><div class="table-wrap"><table><caption class="sr-only">Completed interaction trials</caption><thead><tr><th>Trial</th><th>Buffer</th><th>Outcome</th><th>Duration</th><th>Input</th></tr></thead><tbody id="round-table"><tr><td colspan="5">No completed trials in the ledger.</td></tr></tbody></table></div><div class="actions"><button class="button" id="export-session" disabled>Export run JSON</button><button class="button subtle" id="export-csv" disabled>Export trials CSV</button></div></div></details>
+</section>
+
+<section class="wrap section" id="research" aria-labelledby="research-title"><div class="section-heading"><div><p class="eyebrow">03 / RESEARCH RECORD</p><h2 id="research-title">From research question to inspectable code.</h2></div><p>Signal processing, implementation decisions<br>and the limits of the evidence.</p></div>
+  <div class="lineage-grid"><article class="card lineage"><span class="chapter">01</span><p class="eyebrow">01 / SIGNAL QUALITY</p><h3>Compare conditions.</h3><p>Controlled artificial conditions make signal characteristics inspectable. Explicit amplitude and flat-channel checks identify unusable input windows.</p></article><article class="card lineage"><span class="chapter">02</span><p class="eyebrow">02 / MODEL EVALUATION</p><h3>Build the decoder.</h3><p>A trainable temporal CNN and a fitted spectral baseline are evaluated on held-out virtual subjects, with independent Python and JavaScript inference checks.</p></article><article class="card lineage"><span class="chapter">03</span><p class="eyebrow">03 / INTERACTION DESIGN</p><h3>Evaluate the interaction.</h3><p>Movement and cognition meet in games with adjustable targets, deliberate pacing and an inspectable session log. Co-design and user studies are the proposed next step.</p></article></div>
+  <div class="research-strip"><div><p class="eyebrow">BENCHMARK RECORD / SYNTHETIC ONLY</p><h3>18 virtual subjects. One explicit evaluation protocol.</h3><p>12 training · 3 validation · 3 test. Synthetic data only. Model selection uses validation loss; the final test set contains 96 artificial windows.</p></div><div class="benchmark-result"><span id="benchmark-score">—</span><p>synthetic balanced accuracy<br><b>CNN and baseline</b></p></div></div>
+  <p class="footnote">A perfect result on a deliberately separable synthetic task demonstrates pipeline operation, not real-world EEG performance. The dataset is artificial, imported signals are not classified, and clinical validity has not been established.</p>
+</section>
+</main>
+<footer class="wrap site-footer"><span class="brand">NEUROWEAVE<small>BUILD 1.1 / SEPTEMBER 2026</small></span><p>TRACE / DECODE / INTERACT<br>Synthetic signals · Reproducible research</p><a href="#top">Return to origin ↑</a></footer>
+<script>'use strict';
+const MODEL={
+  "schema": "neuroweave.tinycnn.v1",
+  "source": "synthetic-training-only",
+  "architecture": {
+    "channels": 8,
+    "samples": 256,
+    "filters": 8,
+    "kernel": 17,
+    "stride": 4,
+    "scale_uv": 20
+  },
+  "classes": [
+    "Condition A",
+    "Condition B"
+  ],
+  "parameters": {
+    "kernel": [
+      [
+        [
+          -0.1888151043366101,
+          0.05368647003920107,
+          0.16556280170446838,
+          0.22342778314518688,
+          -0.0606371522179132,
+          -0.1904920747194859,
+          -0.2890809522417217,
+          0.13748480478148126,
+          0.3381305443950398,
+          0.2765582324243085,
+          -0.05832786101633725,
+          -0.18498408856579565,
+          -0.20395589423487573,
+          0.07073138102024977,
+          0.1453464452809532,
+          0.25833912406242937,
+          -0.02290894869408437
+        ],
+        [
+          -0.31641785345232937,
+          -0.32409610359791285,
+          -0.06543935565097664,
+          0.4592744389793393,
+          0.2058611547974209,
+          0.2154350201446834,
+          -0.4685763772425012,
+          -0.34336715252113265,
+          -0.3563472784227148,
+          0.10923214847964054,
+          0.36127345095043173,
+          0.41440612749753125,
+          -0.08148009067194252,
+          -0.4508933338160077,
+          -0.39467581089722803,
+          0.056714175052818984,
+          0.23892812074622025
+        ],
+        [
+          0.29067830601050065,
+          0.4628600967164099,
+          0.06999217065715743,
+          -0.3967063905938635,
+          -0.5091720343662604,
+          -0.15882808619298863,
+          0.6039375364448994,
+          0.4835429165890785,
+          0.40220721200790294,
+          -0.4987178511387665,
+          -0.4748124507577818,
+          -0.6139338790859786,
+          0.22073879999639653,
+          0.41127106782651357,
+          0.49361755255671536,
+          -0.10430265797714355,
+          -0.6912394656083026
+        ],
+        [
+          -0.08196133866867579,
+          0.17208661642566817,
+          0.13300507556193827,
+          0.09404387759465527,
+          -0.05566302211884409,
+          -0.43927394391146174,
+          0.04165374461841747,
+          0.08814448717687819,
+          0.09299265906432222,
+          0.2551017116421808,
+          -0.1633776506934573,
+          -0.11128422509609433,
+          -0.15024496725593417,
+          -0.06250723577697977,
+          0.13534022144015273,
+          0.029567929479171497,
+          0.03806230138728452
+        ],
+        [
+          0.18701519933467736,
+          0.10196678489884517,
+          -0.07154336188196748,
+          -0.3207600838765289,
+          -0.15726335804272806,
+          0.16201962051236318,
+          0.3121156048894969,
+          0.43351370817928114,
+          -0.24909763804900079,
+          -0.40526354175940477,
+          -0.1411721388030331,
+          -0.12831361457664373,
+          0.2942318921079994,
+          0.2283488542668549,
+          0.0791530970880902,
+          -0.24799774505987432,
+          -0.23142271227264566
+        ],
+        [
+          -0.05001222191698402,
+          -0.5883279702376935,
+          -0.24708914311055954,
+          0.10827018172044953,
+          0.4367817088469767,
+          0.23081544233160797,
+          -0.07309715329895919,
+          -0.4482139732048288,
+          -0.6896219152291935,
+          0.14293355323969564,
+          0.5112945107226151,
+          0.3543169074089135,
+          0.10730707047166736,
+          -0.33991308536567166,
+          -0.5099903590285305,
+          0.18883035923841157,
+          0.32321917276347384
+        ],
+        [
+          -0.2956094306767332,
+          0.03436130686510756,
+          0.22835461342123026,
+          0.1903723412787115,
+          0.10450367708684286,
+          -0.3089459353918492,
+          -0.36578222392031234,
+          -0.0926210248316885,
+          -0.09528028344917289,
+          0.5158946658410629,
+          0.17057611525366587,
+          -0.11748168698123851,
+          -0.2641119323153623,
+          -0.3314953997690644,
+          -0.1284924551117786,
+          0.1641132669404486,
+          0.27294147392456497
+        ],
+        [
+          -0.5028336798543696,
+          -0.23892478628779737,
+          0.2908128240030947,
+          0.4198641297821684,
+          -0.1946539721511902,
+          -0.23403797583446026,
+          -0.3223762907506136,
+          -0.48020900086469154,
+          0.18019967343014204,
+          0.5880214657649412,
+          0.475210342893636,
+          0.03159186087969502,
+          -0.5587217342312379,
+          -0.20934346899300002,
+          0.1594568064599414,
+          0.23945303623903022,
+          0.6016604863702025
+        ]
+      ],
+      [
+        [
+          0.24721300061417376,
+          0.2972201499471653,
+          0.10492842081061989,
+          0.1864349180355273,
+          -0.06632675834728766,
+          -0.25436452669219906,
+          -0.07220395600651806,
+          -0.371758301740076,
+          -0.21648180615281218,
+          -0.22195349207967838,
+          0.052517803087499745,
+          0.1492431269220084,
+          0.07698119686864685,
+          0.19816029878928293,
+          0.0878394111338728,
+          0.11112138404237207,
+          0.09018076745101505
+        ],
+        [
+          0.13790386988706532,
+          -0.16181093634024826,
+          0.04929284630314055,
+          -0.4415784691890424,
+          -0.21810526259005036,
+          -0.24106361138778215,
+          -0.16145430372003677,
+          -0.06203423361747747,
+          0.11109403157540416,
+          0.2794172679645851,
+          0.5136524900466436,
+          0.17342170360719966,
+          0.11561392781332758,
+          0.13727333011760437,
+          -0.09266193735305363,
+          -0.19347228933750577,
+          -0.18904024184336873
+        ],
+        [
+          0.22592675421884995,
+          0.322794159596024,
+          -0.11708364353057928,
+          -0.20665829710668795,
+          -0.24684392249640175,
+          -0.1905651917393439,
+          -0.49549619109005466,
+          -0.25701058587404446,
+          0.09037616907432709,
+          0.26919947004175915,
+          0.48899943110668254,
+          0.3242732252959049,
+          0.3532921656033118,
+          0.11711175247450933,
+          -0.0038430042070494433,
+          -0.18009566451198425,
+          -0.31720451350816015
+        ],
+        [
+          0.2647984575054752,
+          0.1651727363412286,
+          0.0008246600228812518,
+          -0.20916437385735634,
+          -0.2826983591398464,
+          -0.3885781552039131,
+          -0.451912223432952,
+          -0.18095712676757453,
+          -0.09254950305541271,
+          0.12290213848292732,
+          0.3159114326293443,
+          0.5090247599425527,
+          0.2463371316792968,
+          0.2573239558459299,
+          0.09205837536033143,
+          -0.11538649197661803,
+          -0.0549328540923906
+        ],
+        [
+          -0.17374672324919052,
+          0.0022048995097147753,
+          0.20684083683395635,
+          0.4735310462104834,
+          0.21029332469826745,
+          0.5117386629899212,
+          0.6063963060060115,
+          0.2228386770501453,
+          -0.31851495540945196,
+          -0.31780306744172127,
+          -0.5174439250329899,
+          -0.2122186663111958,
+          -0.5141097579698563,
+          -0.15011164414046324,
+          0.09901281536412383,
+          0.3182206636687314,
+          0.47969268843639673
+        ],
+        [
+          -0.24223498150935602,
+          -0.3091377008135451,
+          -0.23150109335559244,
+          0.06549477252951098,
+          0.20112271769383933,
+          0.36449873009235967,
+          0.393551749091174,
+          0.49423998935844876,
+          0.2687553808441975,
+          -0.004297295934787932,
+          -0.3118916549339348,
+          -0.3027084410175701,
+          -0.5630344021238929,
+          -0.30103746350995986,
+          -0.23613445965032057,
+          -0.0813942046110743,
+          -0.0032200739815458706
+        ],
+        [
+          -0.04104938746474294,
+          0.11377304411249353,
+          0.09181117798896371,
+          -0.1958738364739364,
+          -0.2342309978194712,
+          -0.14465851349959757,
+          -0.2459815745261987,
+          -0.28083310717820986,
+          -0.1173538692965751,
+          0.16997153615423963,
+          -0.12370378458844059,
+          0.22847783252740644,
+          0.35400251893450174,
+          0.0858119417833258,
+          -0.058361112025351373,
+          0.06685190745600532,
+          -0.03932185019433321
+        ],
+        [
+          0.2978141545037146,
+          0.47416270104077596,
+          0.41505544927583077,
+          0.4774505534800177,
+          0.4352129280131364,
+          0.0014071032777624615,
+          -0.25273871417521676,
+          -0.5564856535911842,
+          -0.35859828312185854,
+          -0.44483443805972495,
+          -0.230938669479334,
+          -0.11218633816286191,
+          0.4991052283234328,
+          0.4770950382066175,
+          0.32096561143873203,
+          0.38238356814561314,
+          0.37295278599513315
+        ]
+      ],
+      [
+        [
+          0.19738728527661453,
+          0.18800390636505843,
+          0.3619379368542707,
+          0.5210198259215583,
+          0.2800359928323541,
+          0.4347511407362769,
+          -0.18115826529242054,
+          -0.21385730643151987,
+          -0.4347261545240055,
+          -0.4084827728596526,
+          -0.5515712292967602,
+          -0.2250333957643215,
+          -0.1426673229100104,
+          0.13772576863414307,
+          0.330216272741164,
+          0.19290950203195942,
+          0.21060205002306348
+        ],
+        [
+          0.31853392326537117,
+          0.1430740638502835,
+          -0.3714770687051491,
+          -0.28487398017022864,
+          -0.49409393520921335,
+          -0.5931379057988228,
+          -0.5591361495886676,
+          -0.29021220888504895,
+          0.02284557821147449,
+          0.24513170061977577,
+          0.3599934033927464,
+          0.39813972800647474,
+          0.31174030026844746,
+          0.21804484432732374,
+          -0.05542360029668089,
+          -0.12816094115273347,
+          -0.21086013038434775
+        ],
+        [
+          0.19567083627374798,
+          0.39802519208678805,
+          0.29502159429622155,
+          0.26759917655639726,
+          0.3414309131918668,
+          -0.05669868484001887,
+          -0.1836509098317951,
+          -0.43776822372570057,
+          -0.34301612539326337,
+          -0.3748617375653766,
+          -0.1218419598831418,
+          -0.00399456908985707,
+          0.2556163303638305,
+          0.2720951079444322,
+          0.4834100177648504,
+          0.19166469643956655,
+          0.17124121372000034
+        ],
+        [
+          -0.4330855643013412,
+          -0.2816261993340989,
+          -0.20388251230760723,
+          0.05663182955359673,
+          0.09509303774438774,
+          0.4391347893683014,
+          0.6243249630959857,
+          0.4576441417753191,
+          0.17979135411122668,
+          0.057085310905296754,
+          -0.1346424467807863,
+          -0.4512028068790178,
+          -0.39763285535610493,
+          -0.3312619443659338,
+          -0.21796353622135228,
+          0.005620893270426108,
+          0.03531908611471651
+        ],
+        [
+          0.04682248432218515,
+          -0.29583702077968516,
+          -0.30261511642440375,
+          -0.1509924676312491,
+          -0.43299293251558346,
+          -0.35651852339464657,
+          -0.14116569451982153,
+          0.0063890092432491484,
+          0.516799593776949,
+          0.3869521396573185,
+          0.22715316183420098,
+          0.3143369476412127,
+          0.11203775628938649,
+          0.023959393233519297,
+          -0.33033117791593253,
+          -0.2774399758874402,
+          -0.29866066464592467
+        ],
+        [
+          -0.21548879334635884,
+          -0.280424501485377,
+          0.04055528914257962,
+          0.31043370045622054,
+          0.2054504588109029,
+          0.37060648066394714,
+          0.5812416320081276,
+          0.46015308216436357,
+          0.17613060797350172,
+          -0.34270176572759026,
+          -0.411429776659495,
+          -0.25228338443766307,
+          -0.38835666188007184,
+          -0.5034215665708521,
+          -0.14837711324810388,
+          -0.003652089026530276,
+          0.27080088933962654
+        ],
+        [
+          0.4201925542368664,
+          0.1943892965950784,
+          0.24169814875697912,
+          0.0770320072688777,
+          0.05032541461378874,
+          -0.07222320523412724,
+          -0.3586213894996681,
+          -0.45580227999157996,
+          -0.14616246663807855,
+          -0.21466411711559688,
+          -0.08828895682657494,
+          0.2782716346386298,
+          0.18845965937011397,
+          0.4450402026306249,
+          0.27315960371391584,
+          0.19096330561861827,
+          0.1471491259486437
+        ],
+        [
+          0.26504349522210796,
+          -0.012482734715667694,
+          0.016382834563081844,
+          0.006136885743721973,
+          -0.11945510021822565,
+          -0.21985755411934266,
+          -0.23802733348550958,
+          -0.005123210830824309,
+          0.032270399198805325,
+          0.06454502159224056,
+          0.22033873286364858,
+          0.1750801657880522,
+          0.10714344540346184,
+          0.018843578609584972,
+          -0.021720015677870245,
+          -0.15431513164584015,
+          -0.05194085920015537
+        ]
+      ],
+      [
+        [
+          0.06608598800603009,
+          -0.04441977168406611,
+          0.10376008197212744,
+          0.20848688133046525,
+          0.17145906036221395,
+          0.1507834154415112,
+          0.14712381408990255,
+          0.2680784709244806,
+          0.00019976023678295912,
+          0.029771948530652237,
+          -0.18886174166936967,
+          -0.2489923268511159,
+          -0.22953691679945348,
+          -0.22096646990850152,
+          -0.07355779004648381,
+          -0.3377387855440177,
+          0.019599908965554313
+        ],
+        [
+          -0.05800960900441962,
+          -0.22067520486262482,
+          -0.37095719142201905,
+          -0.3245465260198543,
+          -0.16474811723075203,
+          -0.4959965332975618,
+          0.130379336890766,
+          0.11664799367841513,
+          0.2830398969238784,
+          0.6387481378128981,
+          0.414484809668214,
+          0.10271631595115821,
+          0.1358177618086505,
+          -0.10209535242007531,
+          -0.27033929506453525,
+          -0.43047385528047316,
+          -0.3531828567142858
+        ],
+        [
+          0.2579766339443071,
+          0.22837869841966,
+          0.41322931512083483,
+          0.26559408101405707,
+          -0.1429356218372994,
+          -0.32300307241570697,
+          -0.21053332242906567,
+          -0.7100331228366608,
+          -0.4259498033603381,
+          -0.19933868359809562,
+          -0.01586192939242398,
+          0.42752219878160697,
+          0.3796014143328089,
+          0.5915815769983068,
+          0.4919818999154399,
+          0.3037778124592798,
+          0.10488967206316245
+        ],
+        [
+          -0.31603031442977847,
+          -0.19274342292899718,
+          -0.2251977949680447,
+          -0.12111058996070957,
+          -0.00815682141424445,
+          0.26392551152068483,
+          0.36007802683491696,
+          0.24175908254327114,
+          0.36410716207033333,
+          0.28649669422474733,
+          -0.09716801293415392,
+          -0.17845896036065872,
+          -0.2865159002511843,
+          -0.255604505153769,
+          -0.16648884939256042,
+          -0.20627226287504025,
+          -0.10457135159015345
+        ],
+        [
+          -0.08506750415758314,
+          0.2769278223139812,
+          0.3678841893533636,
+          0.346202454001851,
+          0.45159510633695754,
+          0.26716646225897445,
+          0.2419108587881645,
+          -0.20000256879474007,
+          -0.4415211678657345,
+          -0.504723402707526,
+          -0.2815491885605351,
+          -0.2784708306452688,
+          -0.1642048341316787,
+          0.11807313750371547,
+          0.3016645486951597,
+          0.4517245696068138,
+          0.28702123230698207
+        ],
+        [
+          0.08128679648877048,
+          -0.17958531900927724,
+          -0.5319968813621991,
+          -0.2511640787842395,
+          -0.3118240433384995,
+          -0.3777436990222051,
+          -0.17849736254072698,
+          -0.025345152618693707,
+          0.5497601533774661,
+          0.17564847373872627,
+          0.5800288860484429,
+          0.20625631386617824,
+          0.21205266916384247,
+          -0.07128765387005184,
+          -0.12001598096828135,
+          -0.28056494187742304,
+          -0.31398968710563124
+        ],
+        [
+          -0.06022186302359722,
+          -0.17047727272023042,
+          -0.19118319126966582,
+          -0.07083420952181393,
+          -0.014288520035914637,
+          0.02485019118178726,
+          0.28366897387992884,
+          0.13997920646052142,
+          0.22664805747942243,
+          0.11559109231599798,
+          0.03660971163779968,
+          -0.20731791673969696,
+          -0.10188247100088874,
+          -0.23351905058173877,
+          -0.15999414830360048,
+          -0.08611551712693934,
+          0.09707488746560694
+        ],
+        [
+          -0.03492998084274267,
+          -0.3697785768973071,
+          -0.4594093542429166,
+          -0.294523904041968,
+          -0.325948860121785,
+          -0.14502646975908345,
+          -0.03710534424440274,
+          0.3688641499953343,
+          0.40228050961889816,
+          0.4160815512397069,
+          0.2757071131173684,
+          0.1359843684391639,
+          -0.05877282352318319,
+          -0.14564699671799747,
+          -0.3696983710922773,
+          -0.23391585781650043,
+          -0.20563102471906625
+        ]
+      ],
+      [
+        [
+          0.15707452397201335,
+          0.2266454670472825,
+          0.19886669641588275,
+          0.14182556889903794,
+          0.2702599773264921,
+          0.214548455110977,
+          -0.1621459659354396,
+          -0.40230135129349864,
+          -0.2718745330716947,
+          -0.27209312581476064,
+          -0.44336632757113603,
+          0.026162150832558375,
+          0.0012277866740012524,
+          0.134264039579866,
+          0.4067185718200833,
+          0.3099443030005936,
+          0.30198845412189973
+        ],
+        [
+          0.0017498276075040098,
+          0.069568983484094,
+          -0.08788946882049657,
+          -0.052742059060656855,
+          0.10686345002702637,
+          0.24395166937474572,
+          0.09574918762796625,
+          0.06369771107681885,
+          0.320845010053777,
+          -0.08499302385722932,
+          -0.029557839145392804,
+          -0.19986005441369142,
+          -0.2521949585222793,
+          -0.16815390372216948,
+          -0.13669441450766215,
+          -0.15375870950309226,
+          0.147637562085411
+        ],
+        [
+          0.15910057401738006,
+          0.10015652914682556,
+          0.1844247297359414,
+          0.17695317247418507,
+          0.01554358964863848,
+          -0.002352448639221557,
+          -0.27179738474172394,
+          -0.2584863852289887,
+          -0.3551977852537377,
+          -0.12889739600740335,
+          -0.006229356987326101,
+          -0.08032777608332478,
+          0.2495774161376589,
+          0.2183291995693273,
+          0.08465759308294378,
+          0.2891189668609462,
+          -0.001358031398108727
+        ],
+        [
+          0.29094440672517485,
+          0.08642851045553947,
+          0.28019836333692344,
+          0.09090472997803269,
+          -0.06781358375205418,
+          -0.2962500416546754,
+          -0.11779064794009557,
+          -0.20786438431661897,
+          -0.22270059831977032,
+          -0.26932051213721014,
+          0.17148761527034614,
+          0.2756894131064538,
+          0.15578786408393336,
+          0.11528767523195876,
+          0.09205609760682533,
+          0.23569101613424207,
+          -0.021006475555227857
+        ],
+        [
+          0.09924081624233877,
+          -0.1025043864070302,
+          -0.39565303116966566,
+          -0.29963074506980203,
+          -0.3796619742943363,
+          -0.5423764568345556,
+          -0.4421145804580051,
+          0.003068509558787573,
+          0.3091141235355968,
+          0.37119627476892386,
+          0.5153352616870294,
+          0.269818103212529,
+          0.1891328892066612,
+          0.05896595571044235,
+          -0.25275871473202305,
+          -0.3409234868391679,
+          -0.4286366569430144
+        ],
+        [
+          0.08611291240214355,
+          0.1489847397147079,
+          0.12368011486941556,
+          0.14658453497539878,
+          0.34866796941397227,
+          -0.0281773887195599,
+          -0.06794912805427178,
+          -0.03120886103544315,
+          -0.15066407647204463,
+          -0.2264701220555244,
+          -0.22869559256210817,
+          -0.12166964290622546,
+          0.1738550869990865,
+          0.13897528131721715,
+          0.042018608025927155,
+          0.18208198235757578,
+          0.34501250245970627
+        ],
+        [
+          -0.0025915745822126927,
+          -0.057434622288036544,
+          0.15880953397106032,
+          0.1253862574295724,
+          0.4632669051926096,
+          0.2586075765347062,
+          0.3623493058860151,
+          0.2616823384266784,
+          -0.06807632713212695,
+          -0.09103544966700235,
+          -0.508085035407492,
+          -0.269376656709473,
+          -0.5320166437586196,
+          -0.07899466115116166,
+          -0.16192579475296398,
+          -0.031756377020103733,
+          0.2798183681372181
+        ],
+        [
+          0.27026866749766265,
+          0.032521364207799094,
+          -0.1214475446649282,
+          -0.23245268760496046,
+          -0.4936653498882717,
+          -0.4337917661446894,
+          -0.5146064539185288,
+          -0.3315755616202166,
+          0.12648163853818203,
+          0.23526578696723272,
+          0.24296915503795166,
+          0.5385201351738935,
+          0.2790561407064865,
+          0.1818743051895165,
+          -0.01748649733106492,
+          -0.22950810442966807,
+          -0.23744414007374157
+        ]
+      ],
+      [
+        [
+          0.15559115487782108,
+          -0.2799055674521263,
+          -0.2191556644814382,
+          -0.2928198313675905,
+          0.24953331597751666,
+          0.30383083765898045,
+          0.23785791605999354,
+          -0.04572458350969493,
+          -0.1369083985296695,
+          -0.473052266997985,
+          -0.2016404853214162,
+          0.33845495475509846,
+          0.29229568884568846,
+          0.2921686736401424,
+          -0.07260860015149452,
+          -0.2680607685770644,
+          -0.178656425020935
+        ],
+        [
+          0.34693159795046147,
+          0.09081036151293263,
+          -0.23498597721598627,
+          -0.4853667935619599,
+          0.10926608415475486,
+          0.31565481381951355,
+          0.3817362015610684,
+          0.2226335064980392,
+          -0.19467654466839804,
+          -0.4390651398905579,
+          -0.2752798099750254,
+          -0.025209734037717722,
+          0.4709376028775794,
+          0.33809619443481564,
+          -0.10031967507005132,
+          -0.24443550807699715,
+          -0.35988738080577104
+        ],
+        [
+          0.2639982304577092,
+          -0.26220429501563175,
+          -0.2633681410995542,
+          -0.0022147430295509363,
+          0.2503618271926367,
+          0.15358896282641965,
+          0.01962011636815464,
+          -0.07464880372470864,
+          -0.157255036855368,
+          -0.26065593298204603,
+          -0.12578306378083903,
+          0.30419462840638367,
+          0.16587199086924098,
+          0.004273005251347966,
+          -0.2757106683217251,
+          -0.1555112496102779,
+          -0.05218678781499819
+        ],
+        [
+          0.07627377537421229,
+          0.2743233619505627,
+          0.19068888828378694,
+          -0.37643601083443107,
+          -0.18560484206055786,
+          -0.2706605312670083,
+          0.05835059195194563,
+          0.3661730963252157,
+          0.3679307039606373,
+          0.02149998369224122,
+          -0.38543055840880236,
+          -0.1570027227639659,
+          -0.17840487908925234,
+          0.08990516314897289,
+          0.4175083935492796,
+          0.08529438897576738,
+          -0.16226983745341764
+        ],
+        [
+          0.2554070553668678,
+          0.23718377933458304,
+          0.04347186675239267,
+          -0.38385796341928874,
+          -0.4578636134409447,
+          0.11911962000786856,
+          0.4246909729427466,
+          0.3800361078297992,
+          0.26336662241915987,
+          -0.36765318940844943,
+          -0.3859810343589342,
+          -0.32218898420070774,
+          0.2761253566739994,
+          0.19692238461619654,
+          0.43937000280910804,
+          -0.1103876726637494,
+          -0.4496493411003611
+        ],
+        [
+          0.18796377901443784,
+          -0.03590011443768955,
+          -0.17959202788769224,
+          -0.20796344620322876,
+          -0.29453140225946595,
+          0.21340986874855378,
+          0.35211193430753074,
+          0.4204423164613895,
+          -0.08126786888041566,
+          -0.4313716727723543,
+          -0.38835582158254744,
+          -0.2042954016397558,
+          0.4024599036743334,
+          0.5703836267474984,
+          0.24757892580493845,
+          -0.4438080194855587,
+          -0.2376960818585452
+        ],
+        [
+          -0.17497874457692583,
+          -0.17675190982032987,
+          -0.4159130971354577,
+          0.3992890521294027,
+          0.37446955631470985,
+          0.11188631762729158,
+          -0.06437133428352618,
+          -0.3061346778833946,
+          -0.21099510312033398,
+          -0.005808177528942643,
+          0.4105555564629924,
+          0.3928397627533552,
+          0.1447241805733551,
+          -0.2842043806076373,
+          -0.17766116449738167,
+          -0.023675265315449844,
+          0.27768222866552195
+        ],
+        [
+          0.04798716533687535,
+          -0.11677398696051716,
+          -0.042305200086912326,
+          -0.07688697283617302,
+          0.09904719263667572,
+          -0.02815265338526402,
+          0.09531279287257097,
+          -0.05632392323532719,
+          -0.31716715691699393,
+          -0.017267878304057627,
+          0.023370868412475487,
+          0.19261962103760455,
+          0.0008363362526640153,
+          -0.09681920275975023,
+          -0.0933937497183651,
+          -0.0801998736754897,
+          0.04839382758108711
+        ]
+      ],
+      [
+        [
+          0.18707249645989962,
+          0.07282961177751326,
+          -0.12687761188772517,
+          -0.34339440181087044,
+          -0.04794030703457813,
+          0.31474740435349274,
+          0.4626941518268495,
+          0.19270223918992602,
+          -0.28722418898372076,
+          -0.356434445520298,
+          -0.2810852953592994,
+          0.11957259163351226,
+          0.44824967060509563,
+          0.373580536017484,
+          -0.006822787715854267,
+          -0.3781701033119054,
+          -0.22804939119049208
+        ],
+        [
+          0.016413506315841726,
+          -0.2510576449668985,
+          -0.2036909989591486,
+          0.3019493812149161,
+          0.20029238814492636,
+          0.2770123147031036,
+          -0.0399060094061728,
+          -0.1695127497192933,
+          -0.47008291811909403,
+          -0.11396070854028804,
+          0.3689147535356463,
+          0.39258509502332956,
+          -0.03944864116604645,
+          0.05283455273804978,
+          -0.15179630385075046,
+          -0.2642220254142143,
+          0.04177649240804871
+        ],
+        [
+          -0.4114363691506618,
+          -0.24960706883820752,
+          0.6192136331956849,
+          0.43185599959076776,
+          0.08895715033133857,
+          -0.5753467906673826,
+          -0.7251389271799056,
+          -0.45399481134141045,
+          0.6054249312726839,
+          0.6741110711909479,
+          0.620783159609729,
+          -0.4026993315669598,
+          -0.3237524740575354,
+          -0.6624654124285815,
+          0.028181657649728804,
+          0.7534500233066088,
+          0.46232329826120844
+        ],
+        [
+          -0.4717679565815648,
+          -0.18961637976161705,
+          0.19159318217560967,
+          0.3791315816533133,
+          0.2575153854019381,
+          -0.46682562407700473,
+          -0.5166956765266887,
+          -0.3729119062045746,
+          0.24427874992703108,
+          0.4894863535764252,
+          0.6209947246521039,
+          0.046903493639977735,
+          -0.4454124038118357,
+          -0.2664923944363893,
+          -0.094709990631925,
+          0.3980853225791738,
+          0.5782762042356425
+        ],
+        [
+          0.4964540008064254,
+          -0.03866648709066434,
+          -0.479479011221854,
+          -0.2672110895938954,
+          0.04699459077396123,
+          0.6036615003993501,
+          0.5077406495066316,
+          0.10556239624440564,
+          -0.46772013567106274,
+          -0.5376577466516247,
+          -0.2648862796673973,
+          0.2183845672773252,
+          0.4789871575616897,
+          0.36671643733175135,
+          -0.20675684323555368,
+          -0.33746087460665475,
+          -0.390367161025513
+        ],
+        [
+          0.03218196901344405,
+          0.4446659412374048,
+          0.40790964385122597,
+          -0.12398194586703591,
+          -0.40330445363456807,
+          -0.5114800960222428,
+          0.09801456835093773,
+          0.5246825088586878,
+          0.39979942765541293,
+          0.32450921729027804,
+          -0.44095452725790946,
+          -0.4701944330910192,
+          -0.21919058304115197,
+          0.19670104927044457,
+          0.45918071986534714,
+          0.2711375329586308,
+          -0.26741894015488465
+        ],
+        [
+          -0.008876771222425348,
+          -0.1777254896903111,
+          -0.4849821901581756,
+          -0.2122212983464734,
+          0.26049807021212906,
+          0.5024776058659792,
+          0.40613088457329105,
+          -0.1990400706605029,
+          -0.46851571115463764,
+          -0.43720386092415797,
+          -0.17981452664499536,
+          0.5252015875751979,
+          0.36981806190602207,
+          0.2070826370667298,
+          -0.1243159226884174,
+          -0.390667134341475,
+          -0.21908954083004825
+        ],
+        [
+          -0.17147974552258657,
+          0.4769052643656407,
+          0.5672060069662836,
+          0.016140904309566426,
+          -0.7396343189098541,
+          -0.4410338874815562,
+          -0.008223413314133825,
+          0.5116758028460366,
+          0.6467483072963903,
+          0.3475565519873953,
+          -0.3085266172752787,
+          -0.6683445554056564,
+          -0.4168548424856157,
+          0.319868518498981,
+          0.5444949349965401,
+          0.3061298674317974,
+          -0.2231892580198893
+        ]
+      ],
+      [
+        [
+          0.3229281497089082,
+          0.3268503625540528,
+          -0.18975095486398066,
+          -0.3831492016888523,
+          -0.3206240484174257,
+          0.04165016783984808,
+          0.4887826028634017,
+          0.26258321258083334,
+          0.0905273260334828,
+          -0.48005663101404616,
+          -0.45957892548565976,
+          -0.13848746585898042,
+          0.06283876339532413,
+          0.42874196651356594,
+          0.043863818186390874,
+          -0.16098276102407608,
+          -0.4999745078847633
+        ],
+        [
+          -0.045423405628682814,
+          0.2265802889648611,
+          -0.17664299703868572,
+          -0.3511345124773705,
+          -0.0535422878229741,
+          0.057617572953347594,
+          0.02858650241624951,
+          0.1518518466237759,
+          0.032696634436038326,
+          -0.24285177176447548,
+          -0.16197257931405157,
+          -0.10843988252782404,
+          0.08996886972017956,
+          0.08295861733138685,
+          0.14306022075944122,
+          0.05052831205357491,
+          -0.19557390159015473
+        ],
+        [
+          -0.28026533766051914,
+          -0.02695908755069376,
+          -0.10261964579611844,
+          0.39822054333137463,
+          0.20424439793109603,
+          -0.08089669005082913,
+          -0.27658741587803043,
+          -0.22363171459683837,
+          -0.08292108248392412,
+          0.21946876424348696,
+          0.0947184133660196,
+          0.251699659666302,
+          -0.15023617097138062,
+          -0.2222649460148841,
+          -0.21521488314551074,
+          -0.009600684030364641,
+          0.13418646421777586
+        ],
+        [
+          0.09786864654227218,
+          0.0295769475436808,
+          -0.21713193687900945,
+          -0.28313305306066144,
+          -0.10006983691950985,
+          0.5595981040604875,
+          0.3635054099891963,
+          0.11440864929642573,
+          -0.312735865363898,
+          -0.3905748612455286,
+          -0.22536397807049094,
+          0.2739772610413328,
+          0.42172965857995465,
+          0.30117735463373874,
+          0.005659114645722961,
+          -0.2509802229161247,
+          -0.38734818679187255
+        ],
+        [
+          -0.48431187843878737,
+          -0.2611198675230391,
+          0.5886173304431179,
+          0.5594202522612162,
+          0.15859297972430564,
+          -0.498826800648012,
+          -0.6410566413124611,
+          -0.5573278691125351,
+          0.5925737321120381,
+          0.3821805442686503,
+          0.3996902815777255,
+          -0.07704606441364181,
+          -0.3929517667789995,
+          -0.601500964740562,
+          0.0008406659986331588,
+          0.36509727456922997,
+          0.2735709621207008
+        ],
+        [
+          0.23220612319415437,
+          -0.328001437104521,
+          -0.45092213590901786,
+          -0.11200590124493745,
+          0.3316288002955556,
+          0.36600607125577306,
+          0.5041382550355058,
+          -0.20922646325653801,
+          -0.5541867422697931,
+          -0.5224717222565487,
+          -0.08191682916454453,
+          0.39470319964473766,
+          0.5308498843562819,
+          0.3059885413696399,
+          -0.49445401692402235,
+          -0.3349058597837382,
+          -0.15064192638402185
+        ],
+        [
+          0.5017567582793667,
+          0.16890796353950038,
+          -0.3449989758366807,
+          -0.5745628355985741,
+          0.10604143831560645,
+          0.2902003397956181,
+          0.7224565783631423,
+          0.23834130141397863,
+          -0.1932226946464337,
+          -0.6159732702060342,
+          -0.379570917235989,
+          0.18589835769292062,
+          0.470480850318467,
+          0.15644651942477586,
+          0.23102340817451208,
+          -0.5129884729341951,
+          -0.4284774065118806
+        ],
+        [
+          0.07011675304449921,
+          0.2910839267859489,
+          0.11754895712878771,
+          -0.2699528103191766,
+          -0.3388437988574329,
+          0.050993650654708685,
+          0.055992960609345686,
+          0.22441644331424024,
+          0.09241772845131853,
+          0.0566577871597613,
+          -0.26662623379809475,
+          -0.3016282451628487,
+          -0.19958538335362114,
+          0.4250720172636105,
+          0.09476822436878164,
+          -0.20233539216336333,
+          0.0059354758306308505
+        ]
+      ]
+    ],
+    "bias": [
+      0.07036281115895753,
+      -0.038811493571598014,
+      -0.04787649379028318,
+      -0.05384734047924804,
+      -0.052869051614348746,
+      0.04557921827163067,
+      0.00915115623895137,
+      0.04243327173413545
+    ],
+    "head": [
+      [
+        -0.4089921921463534,
+        0.39625723302209587
+      ],
+      [
+        0.5072823963697976,
+        -0.646957511237275
+      ],
+      [
+        0.5834413560466805,
+        -0.46370647315734415
+      ],
+      [
+        0.7432680693824146,
+        -0.3567897055026621
+      ],
+      [
+        0.6460787841078143,
+        -0.4814097677672293
+      ],
+      [
+        -0.6977334330632062,
+        0.2857835427118783
+      ],
+      [
+        -0.5723711586946908,
+        0.3419090815445813
+      ],
+      [
+        -0.3927019587885228,
+        0.416291961931244
+      ]
+    ],
+    "head_bias": [
+      -0.0975507225547462,
+      0.0975507225547462
+    ]
+  },
+  "parameter_count": 1114,
+  "baseline_centres": [
+    -2.1958099689975104,
+    2.7648145560378166
+  ]
+}
+;
+const BENCH={
+  "data_source": "synthetic",
+  "clinical_validation": false,
+  "seed": 144,
+  "training_shuffle_seed": 2026,
+  "generator_version": "1.0",
+  "dataset_sha256": "080c88d2ee90f1ecd1e22372cd26abdb6d84734361a110cbbcc8d7641a347738",
+  "virtual_subjects": 18,
+  "windows": 576,
+  "split_subjects": {
+    "train": [
+      "virtual-01",
+      "virtual-02",
+      "virtual-03",
+      "virtual-04",
+      "virtual-05",
+      "virtual-06",
+      "virtual-07",
+      "virtual-08",
+      "virtual-09",
+      "virtual-10",
+      "virtual-11",
+      "virtual-12"
+    ],
+    "validation": [
+      "virtual-13",
+      "virtual-14",
+      "virtual-15"
+    ],
+    "test": [
+      "virtual-16",
+      "virtual-17",
+      "virtual-18"
+    ]
+  },
+  "training": {
+    "epochs": 24,
+    "selected_epoch": 24,
+    "selection": "validation loss only",
+    "optimizer": "Adam",
+    "learning_rate": 0.003,
+    "batch_size": 32
+  },
+  "cnn": {
+    "balanced_accuracy": 1.0,
+    "accuracy": 1.0,
+    "confusion_matrix": [
+      [
+        48,
+        0
+      ],
+      [
+        0,
+        48
+      ]
+    ],
+    "n": 96
+  },
+  "spectral_baseline": {
+    "balanced_accuracy": 1.0,
+    "accuracy": 1.0,
+    "confusion_matrix": [
+      [
+        48,
+        0
+      ],
+      [
+        0,
+        48
+      ]
+    ],
+    "n": 96
+  },
+  "per_test_subject": [
+    {
+      "id": "virtual-16",
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "n": 32
+    },
+    {
+      "id": "virtual-17",
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "n": 32
+    },
+    {
+      "id": "virtual-18",
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "n": 32
+    }
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.6441951623629752,
+      "validation_loss": 0.634390787332097
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.5800967577425581,
+      "validation_loss": 0.5684016551226428
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.5011827793486147,
+      "validation_loss": 0.4846628636750065
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.404061982959691,
+      "validation_loss": 0.3834819361059254
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.30481803668055585,
+      "validation_loss": 0.281873568994169
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.22090258652712205,
+      "validation_loss": 0.19879912663588603
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.15838065488971168,
+      "validation_loss": 0.1387567167207709
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.1155852561781966,
+      "validation_loss": 0.09934896735889147
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.08641627290773439,
+      "validation_loss": 0.07352938770140595
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.06710374020664234,
+      "validation_loss": 0.05664282844741771
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.05353733098481059,
+      "validation_loss": 0.04506214167806388
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.043762369074788775,
+      "validation_loss": 0.03686238379791712
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.036515347429352654,
+      "validation_loss": 0.03085125993012075
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.030907433462830838,
+      "validation_loss": 0.026187516881856
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.026649340131292026,
+      "validation_loss": 0.02269119119960289
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.0231497097535604,
+      "validation_loss": 0.019879504738008886
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.02032916582680053,
+      "validation_loss": 0.017615264542658698
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.018046136419802752,
+      "validation_loss": 0.015738956025383184
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.01607871916588834,
+      "validation_loss": 0.014172649174901875
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.014439645827953007,
+      "validation_loss": 0.012846227222263936
+    },
+    {
+      "epoch": 21,
+      "train_loss": 0.013086936342876573,
+      "validation_loss": 0.011742889889584813
+    },
+    {
+      "epoch": 22,
+      "train_loss": 0.01189529203621284,
+      "validation_loss": 0.010791013299341462
+    },
+    {
+      "epoch": 23,
+      "train_loss": 0.01084950909173942,
+      "validation_loss": 0.009929247695314346
+    },
+    {
+      "epoch": 24,
+      "train_loss": 0.009946807178113639,
+      "validation_loss": 0.009205342393932685
+    }
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5"
+  },
+  "limitations": [
+    "Artificial frequency discrimination, not a human EEG result.",
+    "Single seed, three held-out virtual subjects; no clinical or BCI claim.",
+    "Softmax values are uncalibrated. No mental-state inference."
+  ]
+}
+;
+const VERSION = '1.1.0';
+const SHAPES = ['Node', 'Pulse', 'Phase', 'Gate'];
+function rng(seed=144) {
+  let s=seed>>>0 || 1;
+  return ()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};
+}
+function mean(a){return a.reduce((s,v)=>s+v,0)/a.length;}
+function median(a){if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),i=Math.floor(b.length/2);return b.length%2?b[i]:(b[i-1]+b[i])/2;}
+function quality(samples){
+  if(!Array.isArray(samples)||samples.length!==8||samples.some(c=>!Array.isArray(c)||c.length!==256||c.some(x=>!Number.isFinite(x))))
+    return {usable:false,reasons:['Invalid shape or non-finite samples']};
+  const reasons=[];
+  if(samples.some(c=>{const avg=mean(c);return Math.sqrt(mean(c.map(v=>(v-avg)**2)))<.5;}))reasons.push('Flat channel');
+  if(samples.some(c=>c.some(v=>Math.abs(v)>150)))reasons.push('Amplitude exceeds demo threshold');
+  return {usable:!reasons.length,reasons};
+}
+function makeWindow(seed=144,condition=0,artifact='clean'){
+  const random=rng(seed), t=Array.from({length:256},(_,i)=>i/128);
+  const samples=Array.from({length:8},()=>{
+    const phase=random()*Math.PI*2,gain=.65+random()*.7,drift=.15+random()*.65;
+    return t.map(v=>gain*(14*Math.sin(2*Math.PI*(condition?20:10)*v+phase)+3*Math.sin(2*Math.PI*(condition?10:20)*v+phase*.7))+4*Math.sin(2*Math.PI*drift*v+phase)+(random()+random()+random()-1.5)*8);
+  });
+  if(artifact==='spike')for(let i=108;i<120;i++)samples[0][i]+=220;
+  if(artifact==='flat')samples[3]=Array(256).fill(0);
+  return {schema:'neuroweave.eeg.v1',source:'synthetic',sample_rate_hz:128,unit:'uV',channels:Array.from({length:8},(_,i)=>`C${i+1}`),samples};
+}
+function validateWindow(obj){
+  if(!obj||obj.schema!=='neuroweave.eeg.v1'||obj.sample_rate_hz!==128||obj.unit!=='uV')throw new Error('Use neuroweave.eeg.v1 with 128 Hz samples in uV.');
+  if(!Array.isArray(obj.channels)||obj.channels.length!==8||obj.channels.some(v=>typeof v!=='string'||v.length>24)||new Set(obj.channels).size!==8)throw new Error('Eight unique channel labels are required.');
+  if(!Array.isArray(obj.samples)||obj.samples.length!==8||obj.samples.some(c=>!Array.isArray(c)||c.length!==256||c.some(v=>!Number.isFinite(v)||Math.abs(v)>100000)))throw new Error('Expected eight channels of 256 finite samples each (absolute amplitude ≤ 100000 uV).');
+  return {schema:obj.schema,source:'user-supplied',sample_rate_hz:128,unit:'uV',channels:[...obj.channels],samples:obj.samples.map(c=>[...c])};
+}
+function spectrum(samples){
+  const n=256,fs=128,window=Array.from({length:n},(_,i)=>.5-.5*Math.cos(2*Math.PI*i/n));
+  const norm=fs*window.reduce((s,v)=>s+v*v,0), p=Array(129).fill(0);
+  for(const channel of samples){
+    const avg=mean(channel),x=channel.map((v,i)=>(v-avg)*window[i]);
+    for(let k=0;k<=128;k++){
+      let re=0,im=0;
+      for(let i=0;i<n;i++){re+=x[i]*Math.cos(2*Math.PI*k*i/n);im-=x[i]*Math.sin(2*Math.PI*k*i/n);}
+      p[k]+=(re*re+im*im)/norm*(k===0||k===128?1:2)/samples.length;
+    }
+  }
+  const freqs=p.map((_,i)=>i*.5);
+  const alpha=p.reduce((s,v,i)=>s+(freqs[i]>=8&&freqs[i]<13?v*.5:0),0);
+  const beta=p.reduce((s,v,i)=>s+(freqs[i]>=13&&freqs[i]<=30?v*.5:0),0);
+  return {frequencies:freqs,power:p,alpha,beta,feature:Math.log((beta+1e-8)/(alpha+1e-8))};
+}
+function infer(samples,model){
+  const q=quality(samples);
+  if(!q.usable)return {quality:q,probabilities:null,label:null};
+  const {kernel,bias,head,head_bias}=model.parameters;
+  const x=samples.map(c=>{const avg=mean(c);return c.map(v=>(v-avg)/20);});
+  const pooled=Array(8).fill(0);
+  for(let out=0;out<8;out++){
+    for(let t=0;t<60;t++){
+      let sum=bias[out];
+      for(let c=0;c<8;c++)for(let k=0;k<17;k++)sum+=x[c][t*4+k]*kernel[out][c][k];
+      pooled[out]+=Math.max(0,sum)/60;
+    }
+  }
+  const logits=head_bias.map((v,i)=>v+pooled.reduce((s,x,j)=>s+x*head[j][i],0));
+  const max=Math.max(...logits),exp=logits.map(v=>Math.exp(v-max)),total=exp[0]+exp[1];
+  const probabilities=exp.map(v=>v/total);
+  return {quality:q,probabilities,label:probabilities[1]>probabilities[0]?1:0};
+}
+class PlaySession {
+  constructor({mode='memory',level=2,seed=144,rounds=8}={}){
+    if(!['memory','switch'].includes(mode)||![2,3,4].includes(level)||!Number.isInteger(rounds)||rounds<1||rounds>24)throw new Error('Invalid session settings');
+    this.mode=mode;this.level=level;this.seed=seed;this.rounds=rounds;this.random=rng(seed);
+    this.records=[];this.events=[];this.phase='idle';this.counter=0;this.lastTime=-Infinity;
+  }
+  time(now){if(!Number.isFinite(now)||now<this.lastTime)throw new Error('Monotonic time required');this.lastTime=now;}
+  begin(now){
+    this.time(now);
+    if(!['idle','feedback'].includes(this.phase))return false;
+    if(this.records.length>=this.rounds){this.phase='complete';return false;}
+    this.counter=this.records.length+1;
+    this.cue=Math.floor(this.random()*4);
+    this.rule=Math.floor((this.counter-1)/2)%2?'opposite':'match';
+    this.expected=this.mode==='memory'?Array.from({length:this.level},()=>Math.floor(this.random()*4)):[this.rule==='match'?this.cue:(this.cue+2)%4];
+    this.responses=[];this.pausedMs=0;this.phase='preview';this.levelAtStart=this.level;return true;
+  }
+  ready(now){this.time(now);if(this.phase!=='preview')return false;this.started=now;this.phase='active';return true;}
+  respond(value,now,input='pointer'){
+    this.time(now);
+    if(this.phase!=='active'||!Number.isInteger(value)||value<0||value>3)return false;
+    this.responses.push({value,ms:now-this.started-this.pausedMs,input:input==='keyboard'?'keyboard':'pointer'});
+    if(this.responses.length===this.expected.length){
+      const correct=this.responses.every((r,i)=>r.value===this.expected[i]);
+      this.records.push({round:this.counter,mode:this.mode,level:this.levelAtStart,rule:this.mode==='switch'?this.rule:null,
+        expected:[...this.expected],responses:this.responses.map(r=>({...r})),correct,
+        duration_ms:now-this.started-this.pausedMs,paused_ms:this.pausedMs});
+      this.phase=this.records.length===this.rounds?'complete':'feedback';
+    }
+    return true;
+  }
+  pause(now){this.time(now);if(!['preview','active'].includes(this.phase))return false;this.previous=this.phase;this.pausedAt=now;this.phase='paused';return true;}
+  resume(now){this.time(now);if(this.phase!=='paused')return false;if(this.previous==='active')this.pausedMs+=now-this.pausedAt;this.phase=this.previous;return true;}
+  stop(now){this.time(now);if(['idle','complete','stopped'].includes(this.phase))return false;this.events.push({event:'stop',partial_round:this.counter});this.phase='stopped';return true;}
+  suggestion(){
+    if(this.mode!=='memory'||this.records.length<4||this.phase!=='feedback')return null;
+    const last=this.records.slice(-4);if(last.some(r=>r.level!==this.level))return null;
+    const ratio=last.filter(r=>r.correct).length/4;
+    const proposed=ratio>=.75?Math.min(4,this.level+1):ratio<=.25?Math.max(2,this.level-1):this.level;
+    return proposed===this.level?null:proposed;
+  }
+  acceptSuggestion(){const n=this.suggestion();if(n===null)return false;this.events.push({event:'level_change',after_round:this.records.length,from:this.level,to:n});this.level=n;return true;}
+  summary(){return {completed:this.records.length,correct:this.records.filter(r=>r.correct).length,median_duration_ms:median(this.records.map(r=>r.duration_ms))};}
+  export(){return {schema:'neuroweave.session.v1',app_version:VERSION,behaviour_source:'local_browser_interaction',clinical_validation:false,
+    symbols:[...SHAPES],mode:this.mode,seed:this.seed,planned_rounds:this.rounds,status:this.phase,records:structuredClone(this.records),events:structuredClone(this.events),summary:this.summary()};}
+}
+function toCSV(records){
+  return ['round,mode,level,rule,correct,duration_ms,paused_ms',...records.map(r=>[r.round,r.mode,r.level,r.rule||'',r.correct,Math.round(r.duration_ms),Math.round(r.paused_ms)].join(','))].join('\n')+'\n';
+}
+
+
+const $=id=>document.getElementById(id);
+const targets=[...document.querySelectorAll('[data-target]')];
+let session=null, signal=makeWindow(), signalTrusted=true, signalSeed=144, signalAnalysis=null, observations=[];
+const clock=()=>performance.now();
+const active=()=>session&&!['idle','complete','stopped'].includes(session.phase);
+const label=i=>`${i+1} · ${SHAPES[i]}`;
+const seconds=x=>x==null?'—':`${(x/1000).toFixed(1)} s`;
+function download(name,text,type='application/json'){
+  const url=URL.createObjectURL(new Blob([text],{type})),a=document.createElement('a');
+  a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function gameInfo(){
+  const mode=session?.mode||$('mode').value;
+  $('game-title').textContent=mode==='memory'?'Sequence Buffer':'Rule Router';
+  $('game-instruction').textContent=mode==='memory'?'Memorise the symbol buffer, then reproduce its order on the response pads.':'MATCH: choose the cue. OPPOSITE: Node ↔ Phase, Pulse ↔ Gate. The rule changes every two rounds.';
+  $('level').disabled=active()||$('mode').value==='switch';
+}
+function renderGame(){
+  gameInfo();
+  const phase=session?.phase||'idle',summary=session?.summary()||{completed:0,correct:0,median_duration_ms:null};
+  $('completed').textContent=summary.completed;
+  $('correct').textContent=summary.completed?`${summary.correct} / ${summary.completed}`:'—';
+  $('median').textContent=seconds(summary.median_duration_ms);
+  $('progress-fill').style.width=`${summary.completed/8*100}%`;
+  $('round-label').textContent=session?`${String(session.counter).padStart(2,'0')} / 08 · ${phase.toUpperCase()}`:'AWAITING RUN';
+  targets.forEach(b=>b.disabled=phase!=='active');
+  for(const id of ['mode','target-size'])$(id).disabled=!!active();
+  $('pause').disabled=!['preview','active','paused'].includes(phase);
+  $('pause').textContent=phase==='paused'?'Resume':'Pause';
+  $('stop').disabled=!active();
+  $('advance').disabled=['active','paused'].includes(phase);
+  $('advance').textContent=phase==='preview'?'I’m ready →':phase==='feedback'?'Load next trial →':['complete','stopped'].includes(phase)?'Configure new run':'Load first trial →';
+  if(phase==='preview'){
+    $('cue').textContent=session.mode==='memory'?session.expected.map(label).join(' → '):`${session.rule.toUpperCase()} · Cue: ${label(session.cue)}`;
+    $('game-status').textContent='Preview the buffer. Select “I’m ready” to open the response phase.';
+  }else if(phase==='active'){
+    $('cue').textContent=session.mode==='memory'?`Response buffer · ${session.responses.length} of ${session.expected.length} symbols entered`:`${session.rule.toUpperCase()} · Cue: ${label(session.cue)}`;
+    $('game-status').textContent='Enter the symbol sequence using the response pads or keys 1–4. No deadline.';
+  }else if(phase==='paused'){
+    $('cue').textContent='Run paused · Response timer suspended';$('game-status').textContent='Resume to continue the current trial. Paused time is excluded from the response duration.';
+  }else if(['feedback','complete'].includes(phase)){
+    const last=session.records.at(-1);
+    $('cue').textContent=last.correct?'Sequence verified / response recorded.':`Reference sequence / ${last.expected.map(label).join(' → ')}`;
+    $('game-status').textContent=phase==='complete'?'Run complete. Inspect the ledger, export the data or configure another task.':'Trial recorded. Load the next trial when ready.';
+  }else if(phase==='stopped'){
+    $('cue').textContent='Run closed / completed trials are ready to export';$('game-status').textContent='The unfinished round was not scored.';
+  }
+  const suggestion=session?.suggestion();
+  $('suggestion').hidden=suggestion==null;
+  if(suggestion!=null)$('suggestion-text').textContent=`From the last four trials, use a buffer of ${suggestion} symbols? Apply the change below if you want to test this setting.`;
+  $('export-session').disabled=!session;
+  $('export-csv').disabled=!summary.completed;
+  const tbody=$('round-table');tbody.replaceChildren();
+  if(!summary.completed){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.textContent='No completed trials in the ledger.';tr.append(td);tbody.append(tr);}
+  for(const r of session?.records||[]){
+    const tr=document.createElement('tr');
+    for(const value of [r.round,r.expected.length,r.correct?'Match':'Mismatch',seconds(r.duration_ms),[...new Set(r.responses.map(x=>x.input))].join(' + ')]){const td=document.createElement('td');td.textContent=value;tr.append(td);}
+    tbody.append(tr);
+  }
+  renderTimer();
+}
+function renderTimer(){
+  if(session?.phase==='active')$('timer').textContent=seconds(clock()-session.started-session.pausedMs);
+  else if(['feedback','complete'].includes(session?.phase))$('timer').textContent=seconds(session.records.at(-1)?.duration_ms);
+  else if(session?.phase!=='paused')$('timer').textContent='0.0 s';
+}
+function newSession(){
+  session=new PlaySession({mode:$('mode').value,level:Number($('level').value),seed:144+Math.floor(clock())%100000});
+  observations=[];recordObservation();session.begin(clock());renderGame();
+}
+$('advance').addEventListener('click',()=>{
+  if(!session||['complete','stopped'].includes(session.phase))newSession();
+  else if(session.phase==='preview'){session.ready(clock());renderGame();targets[0].focus();}
+  else if(session.phase==='feedback'){session.begin(clock());renderGame();}
+});
+function answer(value,input){
+  if(!session||!session.respond(value,clock(),input))return;
+  if(['feedback','complete'].includes(session.phase)){
+    session.records.at(-1).layout={unit:'CSS_px',viewport_width:innerWidth,viewport_height:innerHeight,
+      targets:targets.map(b=>{const r=b.getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};})};
+  }
+  renderGame();
+  if(['feedback','complete'].includes(session.phase))$('advance').focus();
+}
+targets.forEach(b=>b.addEventListener('click',()=>answer(Number(b.dataset.target),'pointer')));
+document.addEventListener('keydown',e=>{
+  if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||(e.target instanceof Element&&e.target.matches('input,select,textarea')))return;
+  if(/^[1-4]$/.test(e.key)&&session?.phase==='active'){e.preventDefault();answer(Number(e.key)-1,'keyboard');}
+});
+$('pause').addEventListener('click',()=>{if(session?.phase==='paused')session.resume(clock());else session?.pause(clock());renderGame();});
+$('stop').addEventListener('click',()=>{session?.stop(clock());renderGame();});
+$('accept-suggestion').addEventListener('click',()=>{session?.acceptSuggestion();renderGame();});
+function pauseFor(event){if(session?.pause(clock())){session.events.push({event,round:session.counter});renderGame();}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)pauseFor('hidden_tab');});
+window.addEventListener('resize',()=>pauseFor('viewport_resize'));
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',()=>pauseFor('section_navigation')));
+$('mode').addEventListener('change',()=>{if(!active()){session=null;renderGame();$('cue').textContent='Configure the run, then load the first trial.';}});
+$('target-size').addEventListener('change',()=>document.documentElement.style.setProperty('--target',`${Number($('target-size').value)}px`));
+$('reduce-motion').addEventListener('change',()=>document.documentElement.classList.toggle('reduce-motion',$('reduce-motion').checked));
+document.documentElement.classList.add('reduce-motion');
+setInterval(renderTimer,200);
+$('export-session').addEventListener('click',()=>{
+  const output=session.export();output.settings={target_size_px:Number($('target-size').value),reduced_motion:$('reduce-motion').checked};
+  output.signal_observations=observations;output.signal_note='Independent window observations, not synchronised EEG acquisition. Classifications never control game difficulty.';
+  download('neuroweave-session.json',JSON.stringify(output,null,2));
+});
+$('export-csv').addEventListener('click',()=>download('neuroweave-rounds.csv',toCSV(session.records),'text/csv'));
+
+function recordObservation(){
+  if(!signalAnalysis||observations.length>=200)return;
+  observations.push({observed_at_iso:new Date().toISOString(),source:signalTrusted?'synthetic':'user-supplied',
+    usable:signalAnalysis.quality.usable,prediction:signalAnalysis.label==null?null:MODEL.classes[signalAnalysis.label],
+    probabilities:signalAnalysis.probabilities});
+}
+function plotSignal(){
+  const samples=signal.samples,colors=['#6b9cff','#ff9858','#91d7f2','#dce5f8'];
+  const scale=Math.max(60,...samples.flat().map(Math.abs));
+  let svg='<title>EEG waveform, 8 channels, 2 seconds</title>';
+  for(let tick=0;tick<=4;tick++)svg+=`<path d="M${42+tick*150} 6V260" stroke="#293951" stroke-width="1"/><text x="${42+tick*150}" y="280" fill="#a6b2c8" font-size="10" text-anchor="middle">${tick*.5}</text>`;
+  samples.forEach((channel,c)=>{
+    const y=20+c*32;
+    const points=channel.map((v,i)=>`${(42+i/255*600).toFixed(2)},${(y-v/scale*13).toFixed(2)}`).join(' ');
+    svg+=`<text x="5" y="${y+4}" fill="#a6b2c8" font-size="10">C${c+1}</text><polyline points="${points}" fill="none" stroke="${colors[c%4]}" stroke-width="1.4"/>`;
+  });
+  $('waveform').innerHTML=svg;
+  $('wave-caption').textContent=`${signalTrusted?'Artificial':'Imported'} samples · vertical scale ±${Math.ceil(scale)} µV / channel`;
+  const sp=signalAnalysis.spectrum,max=Math.max(...sp.power.slice(0,81),.01),width=290,height=175;
+  const points=sp.power.slice(0,81).map((p,i)=>`${40+i/80*width},${195-p/max*height}`).join(' ');
+  let chart='<title>Average channel power spectral density from 0 to 40 Hz</title>';
+  chart+='<rect x="98" y="20" width="36.25" height="175" fill="#6b9cff17"/><rect x="134.25" y="20" width="123.25" height="175" fill="#ff985815"/>';
+  for(let i=0;i<=4;i++)chart+=`<path d="M40 ${195-i*height/4}H330" stroke="#293951"/><text x="34" y="${199-i*height/4}" text-anchor="end" fill="#a6b2c8" font-size="9">${(i*max/4).toFixed(1)}</text>`;
+  for(let i=0;i<=4;i++)chart+=`<text x="${40+i*width/4}" y="214" fill="#a6b2c8" text-anchor="middle" font-size="10">${i*10}</text>`;
+  chart+=`<polyline points="${points}" fill="none" stroke="#6b9cff" stroke-width="2.5"/><text x="186" y="237" fill="#a6b2c8" font-size="10" text-anchor="middle">Frequency (Hz)</text>`;
+  $('spectrum').innerHTML=chart;
+}
+function renderSignal(){
+  const q=quality(signal.samples),sp=spectrum(signal.samples);
+  const decoded=signalTrusted?infer(signal.samples,MODEL):{quality:q,label:null,probabilities:null};
+  signalAnalysis={...decoded,spectrum:sp};
+  $('source-label').textContent=signalTrusted?'SYNTHETIC EEG':'IMPORTED · LOCAL ONLY';
+  $('seed-label').textContent=signalTrusted?`SEED ${signalSeed} · 128 Hz · 2 s`:'128 Hz · 2 s · IMPORT';
+  $('quality-label').dataset.state=q.usable?'usable':'blocked';
+  $('quality-label').textContent=q.usable?'Usable demo window':'Abstain';
+  $('quality-detail').textContent=q.usable?'No flat channel or amplitude flag detected.':q.reasons.join(' · ');
+  $('prediction').textContent=decoded.label==null?'No prediction':MODEL.classes[decoded.label];
+  $('prediction-detail').textContent=!signalTrusted?'The synthetic-only model is disabled for imported data.':!q.usable?'Quality gate blocked inference.':`Softmax score: ${(Math.max(...decoded.probabilities)*100).toFixed(1)}%. Uncalibrated; not a clinical confidence score.`;
+  const distances=MODEL.baseline_centres.map(v=>Math.abs(sp.feature-v)),base=distances[1]<distances[0]?1:0;
+  $('baseline').textContent=q.usable&&signalTrusted?MODEL.classes[base]:'No prediction';
+  $('baseline-detail').textContent=q.usable?`8–13 Hz power: ${sp.alpha.toFixed(1)} µV² · 13–30 Hz power: ${sp.beta.toFixed(1)} µV²`:'Inspect the raw waveform before interpreting its spectrum.';
+  plotSignal();recordObservation();
+}
+function regenerate(){
+  signalSeed+=17;signal=makeWindow(signalSeed,Number($('condition').value),$('artifact').value);signalTrusted=true;$('import-status').textContent='';renderSignal();
+}
+$('new-window').addEventListener('click',regenerate);
+$('condition').addEventListener('change',regenerate);
+$('artifact').addEventListener('change',regenerate);
+$('export-window').addEventListener('click',()=>download('neuroweave-eeg-window.json',JSON.stringify(signal,null,2)));
+$('import-window').addEventListener('change',async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    if(file.size>500000)throw new Error('Please use a JSON file smaller than 500 KB.');
+    const parsed=JSON.parse(await file.text());signal=validateWindow(parsed);signalTrusted=false;renderSignal();
+    $('import-status').textContent='Imported locally. Quality and spectral analysis are available; classification is disabled.';
+  }catch(error){$('import-status').textContent=`Import rejected: ${error.message}`;}
+  e.target.value='';
+});
+$('benchmark-score').textContent=`${(BENCH.cnn.balanced_accuracy*100).toFixed(0)}% / ${(BENCH.spectral_baseline.balanced_accuracy*100).toFixed(0)}%`;
+renderSignal();renderGame();
+</script>
+</body></html>

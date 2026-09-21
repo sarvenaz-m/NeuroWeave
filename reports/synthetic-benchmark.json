@@ -1,0 +1,255 @@
+{
+  "data_source": "synthetic",
+  "clinical_validation": false,
+  "seed": 144,
+  "training_shuffle_seed": 2026,
+  "generator_version": "1.0",
+  "dataset_sha256": "080c88d2ee90f1ecd1e22372cd26abdb6d84734361a110cbbcc8d7641a347738",
+  "virtual_subjects": 18,
+  "windows": 576,
+  "split_subjects": {
+    "train": [
+      "virtual-01",
+      "virtual-02",
+      "virtual-03",
+      "virtual-04",
+      "virtual-05",
+      "virtual-06",
+      "virtual-07",
+      "virtual-08",
+      "virtual-09",
+      "virtual-10",
+      "virtual-11",
+      "virtual-12"
+    ],
+    "validation": [
+      "virtual-13",
+      "virtual-14",
+      "virtual-15"
+    ],
+    "test": [
+      "virtual-16",
+      "virtual-17",
+      "virtual-18"
+    ]
+  },
+  "training": {
+    "epochs": 24,
+    "selected_epoch": 24,
+    "selection": "validation loss only",
+    "optimizer": "Adam",
+    "learning_rate": 0.003,
+    "batch_size": 32
+  },
+  "cnn": {
+    "balanced_accuracy": 1.0,
+    "accuracy": 1.0,
+    "confusion_matrix": [
+      [
+        48,
+        0
+      ],
+      [
+        0,
+        48
+      ]
+    ],
+    "n": 96
+  },
+  "spectral_baseline": {
+    "balanced_accuracy": 1.0,
+    "accuracy": 1.0,
+    "confusion_matrix": [
+      [
+        48,
+        0
+      ],
+      [
+        0,
+        48
+      ]
+    ],
+    "n": 96
+  },
+  "per_test_subject": [
+    {
+      "id": "virtual-16",
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "n": 32
+    },
+    {
+      "id": "virtual-17",
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "n": 32
+    },
+    {
+      "id": "virtual-18",
+      "balanced_accuracy": 1.0,
+      "accuracy": 1.0,
+      "confusion_matrix": [
+        [
+          16,
+          0
+        ],
+        [
+          0,
+          16
+        ]
+      ],
+      "n": 32
+    }
+  ],
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.6441951623629752,
+      "validation_loss": 0.634390787332097
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.5800967577425581,
+      "validation_loss": 0.5684016551226428
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.5011827793486147,
+      "validation_loss": 0.4846628636750065
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.404061982959691,
+      "validation_loss": 0.3834819361059254
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.30481803668055585,
+      "validation_loss": 0.281873568994169
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.22090258652712205,
+      "validation_loss": 0.19879912663588603
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.15838065488971168,
+      "validation_loss": 0.1387567167207709
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.1155852561781966,
+      "validation_loss": 0.09934896735889147
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.08641627290773439,
+      "validation_loss": 0.07352938770140595
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.06710374020664234,
+      "validation_loss": 0.05664282844741771
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.05353733098481059,
+      "validation_loss": 0.04506214167806388
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.043762369074788775,
+      "validation_loss": 0.03686238379791712
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.036515347429352654,
+      "validation_loss": 0.03085125993012075
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.030907433462830838,
+      "validation_loss": 0.026187516881856
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.026649340131292026,
+      "validation_loss": 0.02269119119960289
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.0231497097535604,
+      "validation_loss": 0.019879504738008886
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.02032916582680053,
+      "validation_loss": 0.017615264542658698
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.018046136419802752,
+      "validation_loss": 0.015738956025383184
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.01607871916588834,
+      "validation_loss": 0.014172649174901875
+    },
+    {
+      "epoch": 20,
+      "train_loss": 0.014439645827953007,
+      "validation_loss": 0.012846227222263936
+    },
+    {
+      "epoch": 21,
+      "train_loss": 0.013086936342876573,
+      "validation_loss": 0.011742889889584813
+    },
+    {
+      "epoch": 22,
+      "train_loss": 0.01189529203621284,
+      "validation_loss": 0.010791013299341462
+    },
+    {
+      "epoch": 23,
+      "train_loss": 0.01084950909173942,
+      "validation_loss": 0.009929247695314346
+    },
+    {
+      "epoch": 24,
+      "train_loss": 0.009946807178113639,
+      "validation_loss": 0.009205342393932685
+    }
+  ],
+  "environment": {
+    "python": "3.12.14",
+    "numpy": "2.3.5"
+  },
+  "limitations": [
+    "Artificial frequency discrimination, not a human EEG result.",
+    "Single seed, three held-out virtual subjects; no clinical or BCI claim.",
+    "Softmax values are uncalibrated. No mental-state inference."
+  ]
+}
