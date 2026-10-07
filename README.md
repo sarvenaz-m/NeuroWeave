@@ -16,7 +16,7 @@ the signal-processing, model-comparison and evaluation workflow reviewable in
 code. The PhysioNet experiment is new work in this repository, separate from
 the historical thesis and its experimental results.
 
-[Open the offline demo](dist/index.html) · [Real EEG protocol](docs/REAL_EEG_PROTOCOL.md) ·
+[Open the live demo](https://sarvenaz-m.github.io/NeuroWeave/) · [Real EEG protocol](docs/REAL_EEG_PROTOCOL.md) ·
 [Dataset card](docs/DATASET_CARD.md) · [Model card](docs/MODEL_CARD.md) ·
 [Validation record](VALIDATION.md)
 
@@ -69,8 +69,10 @@ See the [complete protocol](docs/REAL_EEG_PROTOCOL.md),
 
 ## Try the console
 
-Open **`dist/index.html`** directly in a browser; no server, account or API key
-is needed. Select **Recorded EEG example** to inspect a processed public trial.
+Open the **[live demo](https://sarvenaz-m.github.io/NeuroWeave/)** in your browser.
+For offline use, download `dist/index.html` and open the saved file locally; no
+server, account or API key is needed. Select **Recorded EEG example** to inspect
+a processed public trial.
 The waveform uses the real motor-channel labels. The console displays the
 precomputed real benchmark separately from live synthetic-model predictions.
 
