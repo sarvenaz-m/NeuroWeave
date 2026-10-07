@@ -1,4 +1,4 @@
-export const VERSION = '1.1.0';
+export const VERSION = '2.0.0';
 export const SHAPES = ['Node', 'Pulse', 'Phase', 'Gate'];
 export function rng(seed=144) {
   let s=seed>>>0 || 1;

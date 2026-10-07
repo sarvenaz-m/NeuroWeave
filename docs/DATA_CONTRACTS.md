@@ -41,3 +41,26 @@ Session files are exports, not an implemented session-import API. Imported EEG J
 ## Stimulus identity in version 1.1
 
 Symbol IDs remain 0–3 with pairs 0↔2 and 1↔3. Version 1.1 uses **Node, Pulse, Phase, Gate** and exports their names in the top-level `symbols` array. Version 1.0 used Leaf, Sun, Wave, Moon. Use `app_version` and `symbols` to interpret exports; the redesigned stimuli are not interchangeable conditions for a human performance comparison. UI “trial” corresponds to the serialized `round` field.
+
+
+## Recorded EEG benchmark contract (v2)
+
+`reports/physionet-pilot/example-real-window.json` is a Python research artifact:
+`schema_version: 1`, `source: physionet-eegmmidb`, `sampling_rate_hz: 128`,
+`units: microvolts`, eight motor-channel labels, finite 8 × 256 `samples`,
+`preprocessing`, `provenance`, `dataset_doi` and `license`. This differs from the
+browser import envelope's `schema`, `sample_rate_hz` and `unit` names. The
+bundled replay adapts it to `neuroweave.eeg.v1`; exporting that replay produces
+an import-compatible browser envelope with its public-data attribution.
+
+Research `predict.py` requires the exact motor-channel order, preprocessing
+contract and quality policy. Schema validation cannot authenticate provenance.
+
+`predictions.csv` has one accepted cue per row, a unique subject/run/event ID,
+subject, run, split, label, onset and model class probabilities. `epoch-audit.csv`
+contains every candidate cue, acceptance and rejection reasons.
+`source-manifest.json` records official raw-file URL, hash, size and coverage.
+`benchmark.json` contains config-derived split counts, metrics, participant
+bootstrap settings, training histories, environment and code/artifact hashes.
+The verifier rejects mismatched hashes, duplicate epoch IDs, wrong subject
+split membership, metric changes or inconsistent QC coverage.

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.0.0 — 2026-10-03
+
+- Add verified PhysioNet EEGMMIDB acquisition and recorded motor-imagery preprocessing.
+- Fix the pilot split before training: 24/6/6 separate people, three runs each.
+- Train a PyTorch compact EEGNet-style CNN using three seeds and compare two classical references.
+- Export source hashes, QC decisions, per-trial predictions, checkpoints and participant-bootstrap intervals.
+- Add recorded EEG replay and a real benchmark summary to the standalone console.
+- Add result verification, model replay and scientific figures; retain the synthetic numerical harness.
+- Update dataset/model cards, attribution, reproduction commands and automated checks.
+
+
 ## 1.1.0 — 2026-09-21
 
 - Established a signal-console visual identity.

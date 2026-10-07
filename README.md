@@ -1,113 +1,172 @@
 ![NeuroWeave — Trace. Decode. Interact.](docs/media/cover.png)
 
-# NeuroWeave
+# NeuroWeave 2
 
-**TRACE / DECODE / INTERACT**
+**Real EEG. Unseen participants. Inspectable experiments.**
 
-A signal-decoding and interaction research console. Inspect artificial EEG, compare a learned decoder with a transparent baseline, and record structured cognitive tasks in one offline application.
+NeuroWeave connects EEG decoding, compact convolutional models and cognitive
+task design. Version 2 adds a reproducible **left/right motor-imagery experiment
+on recorded PhysioNet EEG**, with separate people for training, validation and
+testing. The offline console displays a recorded EEG example, the benchmark
+results and two self-paced interaction tasks.
 
-[Run locally](#run-locally) · [Model card](docs/MODEL_CARD.md) · [Dataset card](docs/DATASET_CARD.md) · [Technical references](docs/REFERENCES.md)
+This portfolio project continues Sarvenaz Mahmoudzadeh Khameneh's MSc focus on
+*deep learning with convolutional neural networks for EEG decoding*. It makes
+the signal-processing, model-comparison and evaluation workflow reviewable in
+code. The PhysioNet experiment is new work in this repository, separate from
+the historical thesis and its experimental results.
 
-| Version | Signal pipeline | Interaction modules | Runtime |
-| --- | --- | --- | --- |
-| **1.1.0** | Eight-channel analysis and a trainable CNN | Sequence Buffer and Rule Router | Self-contained HTML |
+[Open the offline demo](dist/index.html) · [Real EEG protocol](docs/REAL_EEG_PROTOCOL.md) ·
+[Dataset card](docs/DATASET_CARD.md) · [Model card](docs/MODEL_CARD.md) ·
+[Validation record](VALIDATION.md)
 
-## Console modules
+## What changed in version 2
 
-The **Signal Console** exposes input quality, waveform structure, spectral features and a trained temporal CNN. The **Interaction Bench** supplies two self-paced tasks with geometric response pads and explicit state transitions. The **Run Ledger** records completed trials and independent signal observations. EEG predictions never set task difficulty.
-
-| Component | Implemented behavior |
+| Component | Implemented evidence |
 | --- | --- |
-| **Sequence Buffer** | Hold 2–4 symbols in memory and reproduce their order; eight self-paced trials |
-| **Rule Router** | Route a cue through MATCH or OPPOSITE rules, switching every two trials |
-| **Interaction settings** | 88/112 px targets, text and shape cues, keyboard input, pause and reduced motion |
-| **Explicit adaptation** | Memory-length suggestions after four comparable rounds; acceptance is logged |
-| **Run Ledger** | Correctness, response time, input method, pause time and target geometry; JSON/CSV export |
-| **Signal Console** | Eight-channel waveforms, Hann periodogram and integrated band powers |
-| **Quality gate** | Reject malformed/non-finite windows; abstain on flat channels or excessive amplitude |
-| **Model comparison** | Trained 1,114-parameter temporal CNN and a training-fitted spectral baseline |
-| **Local import** | Strict 8 × 256 JSON contract; quality and spectral analysis with classification disabled |
-| **Research pipeline** | Seeded data, separate virtual-subject splits, trained weights and numerical reference fixtures |
+| Public recorded EEG | PhysioNet EEGMMIDB v1.0.0, 36 people, three imagery runs per person |
+| Subject-independent split | 24 training people, 6 validation people, 6 unseen test people |
+| Classical references | Log-band-power logistic regression and regularized CSP + shrinkage LDA |
+| Convolutional model | EEGNet-style PyTorch CNN, 1,490 trainable parameters, three seeds |
+| Audit trail | Source SHA-256 hashes, epoch acceptance/rejection, trial probabilities and checkpoints |
+| Evaluation | Subject-mean balanced accuracy, participant bootstrap intervals and paired differences |
+| Offline console | Recorded EEG replay, real benchmark table, synthetic comparison and cognitive tasks |
 
-![Signal processing and interaction system map](docs/media/system.png)
+## Recorded EEG benchmark
 
-The cover and system map are original vector illustrations, not interface screenshots. The design system uses midnight surfaces, cobalt actions, amber signal paths and a geometric signal lattice; see [Visual identity](docs/VISUAL_IDENTITY.md).
+The task is **imagined left versus right fist movement**, using runs **04, 08
+and 12**. Labels come from EDF+ annotations. One two-second epoch is extracted
+from 1 to 3 seconds after each imagery cue. All trials from one person stay in
+the same split.
 
-## Run locally
+<!-- REAL_RESULTS_START -->
+**1,620 recorded trials**, 108 verified EDF files. All trials passed the fixed QC policy:
+1,080 train, 270 validation and **270 test trials**.
 
-1. Open [dist/index.html](dist/index.html) in a browser.
-2. In **Signal Console**, switch between conditions A/B and inspect the waveform, spectrum and model outputs.
-3. Inject an amplitude artefact or a flat channel to inspect abstention behavior.
-4. In **Interaction Bench**, select a task, load a trial and use the response pads or keys **1–4**.
-5. In **Run Ledger**, inspect completed trials and export JSON/CSV.
+| Model | Subject mean balanced accuracy | 95% participant bootstrap interval |
+| --- | --- | --- |
+| Band power + logistic | 59.30% | 47.70–72.85% |
+| CSP + shrinkage LDA | 54.90% | 49.60–60.59% |
+| Compact CNN (3-seed ensemble) | 63.65% | 53.71–77.10% |
 
-No account, server, headset or API key is needed. All runtime assets are embedded. State is held in memory until exported; reloading resets the session. There is no EEG hardware acquisition or application data-upload endpoint.
+CNN minus band-power reference: **+4.35 percentage points**,
+paired 95% interval **-1.90 to +10.05 points**. The interval includes zero;
+this pilot does not establish that the CNN reliably outperforms the band-power reference.
+<!-- REAL_RESULTS_END -->
 
-## Reproducible benchmark
+![Recorded EEG benchmark and per-participant results](docs/media/real-eeg-benchmark.png)
 
-The included benchmark contains **576 artificial windows**, **18 virtual subjects**, eight channels and 256 samples per window at 128 Hz. Conditions A/B use deliberately separable 10 Hz / 20 Hz components with noise and nuisance variation. The labels are artificial frequency conditions, not mental states or diagnoses.
+The primary score gives each held-out person equal weight. Intervals resample
+people, not individual trials. A six-person test cohort gives limited evidence
+about population generalization; three CNN seeds measure training sensitivity
+on the same split. A weaker or inconclusive CNN result is reported as such.
+This experiment does not establish a universal advantage for deep learning.
 
-| Split | Virtual subjects | Windows | Role |
-| --- | --- | --- | --- |
-| Train | 01–12 | 384 | Fit CNN weights and baseline centers |
-| Validation | 13–15 | 96 | Select the CNN checkpoint by cross-entropy loss |
-| Test | 16–18 | 96 | Evaluate the selected checkpoint |
+See the [complete protocol](docs/REAL_EEG_PROTOCOL.md),
+[trial predictions](reports/physionet-pilot/predictions.csv),
+[QC audit](reports/physionet-pilot/epoch-audit.csv), and
+[machine-readable benchmark](reports/physionet-pilot/benchmark.json).
 
-The packaged benchmark reports **100% balanced accuracy for both the CNN and spectral baseline**. This easily separable synthetic task demonstrates pipeline operation; it does not establish CNN superiority or performance on real EEG.
+## Try the console
 
-![Synthetic learning curves and held-out confusion matrix](docs/media/benchmark.png)
+Open **`dist/index.html`** directly in a browser; no server, account or API key
+is needed. Select **Recorded EEG example** to inspect a processed public trial.
+The waveform uses the real motor-channel labels. The console displays the
+precomputed real benchmark separately from live synthetic-model predictions.
 
-![Artificial waveforms and their computed spectra](docs/media/signal-comparison.png)
+Use **Synthetic replay** to switch between artificial 10/20 Hz conditions,
+inject an amplitude artefact or flatten a channel. The original NumPy CNN and
+JavaScript forward pass remain a numerical reference harness. Both models
+score 100% on this deliberately simple synthetic task; this is not the real
+EEG result. Imported windows and recorded EEG replay are never classified by
+the synthetic-trained model.
 
-The [model card](docs/MODEL_CARD.md), [dataset card](docs/DATASET_CARD.md) and [machine-readable report](reports/synthetic-benchmark.json) specify the generator, training procedure and limitations.
+**Sequence Buffer** records eight memory trials with 2–4 symbols. **Rule
+Router** alternates MATCH/OPPOSITE rules. Both support keys 1–4, pause, reduced
+motion and adjustable response pads. The ledger exports local responses as
+JSON/CSV. EEG observations and task responses remain separate; predictions do
+not change task difficulty. State stays in memory until export.
 
-## Development and verification
+![Recorded EEG console in Chromium](docs/media/console-desktop.png)
 
-Use **Node.js 24 or newer**:
+The screenshot shows the implemented console. A [mobile rendering](docs/media/console-mobile.png)
+is also included; physical-device touch and assistive technology still require testing.
+
+## Verify the packaged results
+
+Use **Python 3.12**. Install the scientific dependencies and pinned CPU PyTorch:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-real.txt
+python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
+python -m research.real_eeg.verify --check-code
+python -m research.real_eeg.predict
+python -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+Verification needs no raw-data download: it checks artifact hashes, split
+membership, QC coverage, and recomputes metrics and intervals from saved trial
+predictions. The prediction command replays the exported models on the recorded
+example. Re-running training is a separate, stronger reproduction step.
+
+For the interface, use **Node.js 24+**:
 
 ```bash
 npm ci --ignore-scripts
 npm run check
 ```
 
-This builds the standalone demo, runs 21 JavaScript/DOM tests and checks local documentation links. jsdom is a development dependency; the demo has no third-party runtime packages.
+The build embeds console code, the recorded example, synthetic model weights
+and a real-report summary into a standalone HTML file. jsdom is a development
+dependency; the browser app has no third-party runtime packages or upload endpoint.
 
-Use **Python 3.12** for the numerical reference and model training:
+## Reproduce training on the real recordings
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m unittest discover -s tests -p 'test_*.py' -v
-```
-
-To retrain and regenerate the benchmark intentionally:
+Only selected EDF runs are downloaded: approximately 270 MiB for the 36-person
+pilot. Files are checked against PhysioNet's official SHA-256 index, including
+cached files. Network/verification errors stop execution.
 
 ```bash
-OPENBLAS_NUM_THREADS=1 python research/train.py
-python research/plot_report.py
-npm run build
+python -m research.real_eeg.download --config configs/physionet-pilot.json
+OPENBLAS_NUM_THREADS=1 python -m research.real_eeg.train --config configs/physionet-pilot.json --output reports/runs/physionet-pilot-repeat
+python -m research.real_eeg.verify --report-dir reports/runs/physionet-pilot-repeat --check-code
+python -m research.real_eeg.plot_report --report-dir reports/runs/physionet-pilot-repeat --media-dir reports/runs/physionet-pilot-repeat/figures
 ```
 
-On Windows, activate the environment with `.venv\Scripts\activate` and set the optional `OPENBLAS_NUM_THREADS` variable using the shell's syntax. No GPU is required. NumPy implements convolution, backpropagation and Adam directly. The compact CNN is a custom architecture, not EEGNet.
+A fresh output directory prevents mixing runs. Raw EEG and repeat runs are
+git-ignored. CPU execution is supported; recorded timings are in the benchmark
+JSON. Small numerical differences can occur across hardware and library builds
+despite fixed seeds and deterministic PyTorch algorithms.
 
-The six Python tests cover gradients, virtual-subject isolation, spectral energy and saved-model evaluation. JavaScript tests also compare Python/JavaScript inference, validate imports and exercise task state transitions. See [VALIDATION.md](VALIDATION.md) for exact scope and outstanding device checks.
+`configs/physionet-full.json` declares all 109 public subjects with a separate
+fixed split. The full-cohort experiment is **not reported as completed** here;
+strict sample-rate, channel and per-subject checks can stop on unusual source
+records. Review those cases and document any revised eligibility protocol
+before evaluating a full-cohort model. Use a separate output directory.
 
-## Research boundaries
-
-The task interface records screen selections; it does not measure joint angles, physical rehabilitation progress or cognitive recovery. Signals are artificial unless imported. Imported signals are never classified by the synthetic-data model. Browser rendering, physical touch and assistive technology require manual verification. The [proposed study](docs/STUDY_PROTOCOL.md) focuses on usability and co-design; no human-study result is claimed.
+On Windows, activate with `.venv\Scripts\activate`; the optional
+`OPENBLAS_NUM_THREADS` setting uses the syntax of your shell.
 
 ## Repository guide
 
 | Path | Contents |
 | --- | --- |
-| `src/` | Interface, pure signal functions and game state machine |
-| `dist/index.html` | Offline distribution |
-| `research/` | Synthetic generator, CNN training, benchmark and plots |
-| `models/tinycnn.json` | Exported weights and fitted baseline centers |
-| `data/example-window.json` | Synthetic import example |
-| `reports/` | Numerical benchmark and validation record |
-| `tests/` | JavaScript, DOM, Python and numerical references |
-| `docs/` | Architecture, data contracts, research cards and study protocol |
+| `research/real_eeg/` | Verified downloader, preprocessing, baselines, CNN, evaluation and replay |
+| `configs/` | Fixed subject splits and training settings |
+| `reports/physionet-pilot/` | Real results, predictions, QC, source manifest, models and example |
+| `research/neuro.py`, `research/train.py` | Original seeded synthetic NumPy benchmark |
+| `models/tinycnn.json` | Synthetic-only weights used in the browser |
+| `src/`, `dist/index.html` | Source and self-contained offline console |
+| `tests/` | Numerical, provenance, split-integrity, model-replay and DOM checks |
+| `docs/` | Research cards, protocol, architecture, data contracts and scientific figures |
 
-Code and original artwork use the [MIT license](LICENSE). [Provenance](PROVENANCE.md) documents software and data origins. [CITATION.cff](CITATION.cff) provides software citation metadata; related research is listed in [References](docs/REFERENCES.md).
+This is an offline research benchmark and interaction prototype. Hardware EEG
+acquisition, real-time decoding, human usability studies and an Android-native
+integration are future work. Task responses measure screen interactions.
+
+Source code and original artwork use [MIT](LICENSE). Public EEG derivatives
+retain [dataset attribution and licensing](LICENSE_DATA.md).
+[References](docs/REFERENCES.md) and [CITATION.cff](CITATION.cff) identify the
+sources of the data and architecture.

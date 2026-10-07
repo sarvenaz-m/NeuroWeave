@@ -26,3 +26,14 @@ The W3C [target-size guidance](https://www.w3.org/WAI/WCAG22/Understanding/targe
 - Background the browser mid-response, return and confirm an explicit resume is required.
 
 Waveforms have a textual overview and quality/power summaries but no full nonvisual sample explorer. Single-switch scanning, custom key mapping, localisation, full screen-reader chart navigation and physical input devices are future work. Timings combine recall, choice and interaction; they are not calibrated motor measurements.
+
+
+## Version 2 browser check
+
+Headless Chromium 154.0.8037.92 rendered the standalone page at 1440 × 1000
+and 390 × 844 CSS pixels. Recorded/synthetic switching worked, three real
+model results appeared, and neither width produced document-level horizontal
+overflow. No script errors or runtime network requests were observed. The
+screenshots are actual browser renderings. These checks do not substitute for
+physical touch, screen readers, keyboard navigation across all controls or a
+full WCAG audit.

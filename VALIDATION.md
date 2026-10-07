@@ -1,39 +1,74 @@
 # Validation record
 
-Build reviewed: **1.1.0 · 21 September 2026**.
+Build: **2.0.0 · 3 October 2026**.
 
-| Check | Result | Practical boundary |
+| Check | Result | Scope |
 | --- | --- | --- |
-| JavaScript signal and engine tests | 15 passed | Deterministic functions and timing logic |
-| DOM integration tests | 6 passed | jsdom; does not render pixels or emulate physical touch |
-| Python research tests | 6 passed | Numerical correctness, split integrity, saved-model evaluation |
-| Standalone build | Passed | HTML, CSS, model and script bundled without runtime network dependencies |
-| Local documentation links | Checked | Local targets only; not proof of future external availability |
-| Original cover, lattice, system map, palette and research figures | Rendered and visually inspected | Illustrations and exact plots; not UI screenshots |
-| Real-browser visual/touch/accessibility testing | Not performed | Complete the manual checklist before presentation |
-| User study or clinical validation | Not performed | Study protocol is proposed |
+| JavaScript core | 15 passed | Signal math, synthetic Python/JS parity and task state/timing |
+| DOM integration | 9 passed | Recorded/synthetic trust boundaries, imports, evidence table and task controls |
+| Python synthetic research | 6 passed | Analytic gradients, spectral energy and original saved model |
+| Python recorded EEG | 10 passed | Subject/run isolation, epoch timing/resampling, QC audit, CSP rank stability, uncertainty and model replay |
+| Total automated tests | **40 passed; 0 failed; 0 skipped** | Current local execution; GitHub will rerun after push |
+| Real data execution | Completed on CPU | 108 official-hash-verified EDF files, 36 participants, 1,620 accepted cues |
+| Held-out evaluation | Completed | 270 trials from 6 people absent from training and validation |
+| Artifact verification | Passed | Hashes, split membership, counts, primary/seed metrics and participant intervals |
+| Exported model replay | Passed | Plain-JSON references and all three PyTorch checkpoints reproduce saved example probabilities |
+| Standalone build | Passed | Embedded resources; no application runtime network dependencies |
+| Chromium rendering / smoke | Passed | 1440 × 1000 and 390 × 844; no script errors or horizontal overflow |
+| Physical touch / screen reader / human study | Not performed | See the remaining accessibility and study checklists |
 
-## Checks that matter
+The [machine-readable record](reports/validation.json) separates software
+checks, recorded-data execution and browser rendering. [Browser evidence](reports/browser-smoke.json)
+records the engine version, states, viewport widths, script errors and network requests.
+Screenshots in `docs/media/console-*.png` are actual headless Chromium renderings.
+The cover and lattice remain illustrative vector art.
 
-The signal tests compare the JavaScript CNN with independent Python outputs on four held-out virtual-subject windows. PSD values are compared with NumPy FFT results; a known 10 Hz sine checks peak position and integrated power. Python tests check analytic gradients against finite differences, exclude subject overlap across splits and recompute held-out accuracy from exported weights.
+## Recorded EEG evidence
 
-Game tests verify pause subtraction, preview timing, invalid time rejection, duplicate/out-of-phase input handling, explicit difficulty acceptance, deterministic rule switching and early termination. DOM tests exercise cue hiding, keyboard responses, notebook rows, pause/resume, artefact abstention and imported-data classification blocking.
+The fixed pilot uses 24 training, 6 validation and 6 test people. Preprocessing
+and subject membership were declared before fitting. All 1,620 candidate
+windows passed the specified conservative QC policy; the audit records that
+zero rejections occurred, rather than claiming broader artifact removal.
+The packaged CPU run took about 86 seconds excluding download/install time.
 
-Responsive CSS, physical touch and assistive technologies require the [manual checklist](docs/ACCESSIBILITY.md). DOM tests verify events and state; they do not render browser pixels.
+Primary subject-mean balanced accuracy: CNN ensemble **63.65%**, band-power
+logistic **59.30%**, CSP + LDA **54.90%**. The paired CNN–band-power 95% interval
+includes zero. Results describe this cohort/split and accepted offline epochs;
+three CNN seeds are not three independent participant samples.
 
-## Run the same checks
+Verification recalculates metrics from saved trial predictions. Saved-model
+replay also checks inference against the recorded example. To independently
+reproduce acquisition, preprocessing and fitting, download the verified EDFs
+and rerun the [training commands](README.md#reproduce-training-on-the-real-recordings).
+The final release run also reproduced the earlier trial probabilities and metrics
+exactly on the same CPU/software environment. The complete 109-person
+experiment has not been executed.
+
+## Run the checks
 
 ```bash
 npm ci --ignore-scripts
 npm run check
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-real.txt
+python -m pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cpu
 python -m unittest discover -s tests -p 'test_*.py' -v
+python -m research.real_eeg.verify --check-code
+python -m research.real_eeg.predict
 ```
 
-Training ran successfully and produced the weights and report shipped here. The artificial benchmark score is not a software test count and not a clinical outcome. Floating-point details may vary across platforms; reference checks use explicit tolerances.
+CI runs the build, JavaScript/DOM checks, Python checks and report verification
+without downloading participant recordings. The published v1 CI success is
+historical; a v2 GitHub Actions run only exists after these changes are pushed.
 
-## Version 1.1 scope
+## Browser and manual boundaries
 
-The identity redesign changes presentation, labels and visible stimuli. Existing interaction checks are rerun against the rebuilt demo. The numerical model is unchanged; the six Python tests verify its calculations and packaged weights. No new human-performance comparison between the old and new symbols has been performed.
+Headless Chromium 154.0.8037.92 successfully loaded the offline file, showed
+recorded EEG and three real scores, switched to synthetic predictions and
+returned to recorded analysis without classification. Network monitoring
+observed no runtime requests beyond the local document. Both viewport widths
+had no document-level horizontal overflow; mobile tables scroll within their
+container. The rendered signal and evidence panels were visually inspected.
 
-The five primary text/background palette pairs were checked numerically: the lowest contrast ratio was 5.26:1. This limited palette check is not a full accessibility audit. The standalone build also passed resource-embedding, duplicate-ID, anchor and module-order checks.
+Physical-device input, assistive technology, synchronized hardware acquisition
+and usability outcomes were not evaluated. Follow [accessibility](docs/ACCESSIBILITY.md)
+and the [proposed study protocol](docs/STUDY_PROTOCOL.md) for those next steps.

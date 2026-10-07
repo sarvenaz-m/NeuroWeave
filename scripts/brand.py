@@ -23,7 +23,7 @@ def lattice():
  for y in range(52,573,40):parts.append(line(25,y,743,y,'#152238'))
  for x,y,sx,sy in [(24,38,1,1),(744,38,-1,1),(24,583,1,-1),(744,583,-1,-1)]:
   parts.append(f'<path d="M{x+sx*20} {y}H{x}V{y+sy*20}" fill="none" stroke="#526583"/>')
- parts.extend([text(39,67,'NW / SIGNAL LATTICE',10,BLUE),text(554,67,'SYNTHETIC INPUT',9,MUTED)])
+ parts.extend([text(39,67,'NW / SIGNAL LATTICE',10,BLUE),text(554,67,'ILLUSTRATIVE INPUT',9,MUTED)])
  # Input signal rail. The curves are decorative, with no scientific axes.
  parts.append('<rect x="40" y="158" width="164" height="262" fill="#0d1729" stroke="#344c72"/>')
  parts.append(text(53,184,'INPUT / 08 CH',11,WHITE))
@@ -58,9 +58,9 @@ def lattice():
  # Orthogonal routing and output capsule.
  parts.append(f'<path d="M184 346H204L236 364M532 397L578 432H675V463" fill="none" stroke="{ORANGE}" stroke-width="2"/>')
  parts.append(f'<rect x="571" y="463" width="154" height="72" fill="#201c1c" stroke="{ORANGE}"/>')
- parts.append(text(588,488,'OUTPUT / A : B',11,ORANGE))
+ parts.append(text(588,488,'OUTPUT / LEFT : RIGHT',11,ORANGE))
  for i,w in enumerate([80,34]):parts.append(f'<rect x="588" y="{500+i*13}" width="{w}" height="5" fill="{ORANGE if i==0 else "#8f593a"}"/>')
- parts.extend([text(237,527,'CONVOLUTION / LATENT FEATURES',10,BLUE),text(237,548,'1,114 trainable parameters',10,MUTED),text(39,568,'ILLUSTRATION / NOT AN ACQUISITION DISPLAY',8,MUTED)])
+ parts.extend([text(237,527,'CONVOLUTION / LATENT FEATURES',10,BLUE),text(237,548,'1,490 CNN parameters',10,MUTED),text(39,568,'ILLUSTRATION / NOT AN ACQUISITION DISPLAY',8,MUTED)])
  return ''.join(parts)
 art=lattice()
 (OUT/'signal-core.svg').write_text(wrap(art,760,620,'Original signal-processing lattice illustration'))
@@ -69,7 +69,7 @@ body=f'<rect width="1600" height="920" fill="{BG}"/>'
 body+='<path d="M70 129H1530M70 778H1530" stroke="#2a3953"/>'
 body+=f'<rect x="76" y="54" width="49" height="49" fill="#2662e8"/><path d="M84 89V67l14 22V67m0 0 8 22 9-22" stroke="white" stroke-width="2.6" fill="none"/>'
 body+=text(144,86,'NEUROWEAVE',28,WHITE,'bold', 'letter-spacing="1"')
-body+=text(1165,82,'RESEARCH CONSOLE / BUILD 1.1',12,MUTED)
+body+=text(1165,82,'RESEARCH CONSOLE / BUILD 2.0',12,MUTED)
 body+=text(80,185,'EEG DECODING × INTERACTION EXPERIMENTS',12,ORANGE,'normal','letter-spacing="1.7"')
 for word,y,colour in [('TRACE.',303,WHITE),('DECODE.',411,WHITE),('INTERACT.',519,BLUE)]:
  body+=text(72,y,word,112,colour,'bold','letter-spacing="-5"')
@@ -77,9 +77,9 @@ body+=text(81,577,'Inspect the waveform. Challenge the model.',21,WHITE)
 body+=text(81,612,'A reproducible signal-to-interaction research system.',16,MUTED)
 body+=f'<rect x="81" y="655" width="181" height="39" fill="#2662e8"/>'+text(100,680,'SIGNAL CONSOLE',12,WHITE,'bold')
 body+=f'<rect x="275" y="655" width="184" height="39" fill="none" stroke="#47628e"/>'+text(294,680,'INTERACTION BENCH',11,WHITE)
-body+=text(81,747,'SYNTHETIC SIGNALS / REPRODUCIBLE EXPERIMENTS',10,MUTED)
+body+=text(81,747,'RECORDED EEG / REPRODUCIBLE EXPERIMENTS',10,MUTED)
 body+=f'<g transform="translate(786 149) scale(.94)">{art}</g>'
-for i,(n,label) in enumerate([('08','SIGNAL CHANNELS'),('1,114','MODEL PARAMETERS'),('02','COGNITIVE TASKS'),('LOCAL','OFFLINE DEMO')]):
+for i,(n,label) in enumerate([('08','SIGNAL CHANNELS'),('36','RECORDED PARTICIPANTS'),('02','COGNITIVE TASKS'),('LOCAL','OFFLINE DEMO')]):
  x=80+i*380
  if i:body+=line(x-21,800,x-21,884)
  body+=text(x,840,n,34,WHITE,'bold')+text(x,870,label,10,BLUE,'normal','letter-spacing="1.5"')
@@ -89,7 +89,7 @@ body=f'<rect width="1500" height="710" fill="{BG}"/>'
 body+=text(58,65,'NEUROWEAVE / SYSTEM MAP',12,ORANGE,'normal','letter-spacing="2"')
 body+=text(55,128,'Two instruments. One research record.',41,WHITE,'bold')
 for x,tag,title,colour,rows in [
- (58,'01 / SIGNAL CONSOLE','Inspect the model.',BLUE,['Synthetic or imported 8-channel windows','Quality checks → waveform + spectral analysis','Synthetic-only CNN + spectral baseline','Python ↔ JavaScript numerical agreement']),
+ (58,'01 / SIGNAL CONSOLE','Inspect the model.',BLUE,['Recorded, synthetic or imported windows','Quality checks → waveform + spectral analysis','Synthetic-only CNN + spectral baseline','Real EEG benchmark / separate test participants']),
  (772,'02 / INTERACTION BENCH','Observe the response.',ORANGE,['Sequence Buffer / Rule Router','Geometric response pads + keyboard input','Pause-aware timing + explicit difficulty choice','Trial-level outcomes → JSON + CSV'])]:
  body+=f'<rect x="{x}" y="183" width="670" height="345" fill="{PANEL}" stroke="{LINE}"/><path d="M{x} 183H{x+670}" stroke="{colour}" stroke-width="3"/>'
  body+=text(x+27,220,tag,11,colour)+text(x+25,267,title,27,WHITE,'bold')

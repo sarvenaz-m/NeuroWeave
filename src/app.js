@@ -1,10 +1,13 @@
 import {SHAPES,PlaySession,makeWindow,validateWindow,quality,spectrum,infer,toCSV} from './core.js';
 import MODEL from '../models/tinycnn.json' with {type:'json'};
 import BENCH from '../reports/synthetic-benchmark.json' with {type:'json'};
+import REAL_BENCH from '../reports/physionet-pilot/benchmark.json' with {type:'json'};
+import REAL_EXAMPLE from '../reports/physionet-pilot/example-real-window.json' with {type:'json'};
 
 const $=id=>document.getElementById(id);
 const targets=[...document.querySelectorAll('[data-target]')];
 let session=null, signal=makeWindow(), signalTrusted=true, signalSeed=144, signalAnalysis=null, observations=[];
+let signalMode='synthetic';
 const clock=()=>performance.now();
 const active=()=>session&&!['idle','complete','stopped'].includes(session.phase);
 const label=i=>`${i+1} · ${SHAPES[i]}`;
@@ -112,7 +115,8 @@ $('export-csv').addEventListener('click',()=>download('neuroweave-rounds.csv',to
 
 function recordObservation(){
   if(!signalAnalysis||observations.length>=200)return;
-  observations.push({observed_at_iso:new Date().toISOString(),source:signalTrusted?'synthetic':'user-supplied',
+  observations.push({observed_at_iso:new Date().toISOString(),source:signalMode==='recorded'?'physionet-eegmmidb':signalTrusted?'synthetic':'user-supplied',
+    epoch_id:signalMode==='recorded'?REAL_EXAMPLE.provenance.epoch_id:null,
     usable:signalAnalysis.quality.usable,prediction:signalAnalysis.label==null?null:MODEL.classes[signalAnalysis.label],
     probabilities:signalAnalysis.probabilities});
 }
@@ -124,10 +128,11 @@ function plotSignal(){
   samples.forEach((channel,c)=>{
     const y=20+c*32;
     const points=channel.map((v,i)=>`${(42+i/255*600).toFixed(2)},${(y-v/scale*13).toFixed(2)}`).join(' ');
-    svg+=`<text x="5" y="${y+4}" fill="#a6b2c8" font-size="10">C${c+1}</text><polyline points="${points}" fill="none" stroke="${colors[c%4]}" stroke-width="1.4"/>`;
+    const escaped=signal.channels[c].replace(/[&<>"']/g,v=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[v]));
+    svg+=`<text x="5" y="${y+4}" fill="#a6b2c8" font-size="10">${escaped}</text><polyline points="${points}" fill="none" stroke="${colors[c%4]}" stroke-width="1.4"/>`;
   });
   $('waveform').innerHTML=svg;
-  $('wave-caption').textContent=`${signalTrusted?'Artificial':'Imported'} samples · vertical scale ±${Math.ceil(scale)} µV / channel`;
+  $('wave-caption').textContent=`${signalMode==='recorded'?'Recorded':signalTrusted?'Artificial':'Imported'} samples · vertical scale ±${Math.ceil(scale)} µV / channel`;
   const sp=signalAnalysis.spectrum,max=Math.max(...sp.power.slice(0,81),.01),width=290,height=175;
   const points=sp.power.slice(0,81).map((p,i)=>`${40+i/80*width},${195-p/max*height}`).join(' ');
   let chart='<title>Average channel power spectral density from 0 to 40 Hz</title>';
@@ -141,21 +146,34 @@ function renderSignal(){
   const q=quality(signal.samples),sp=spectrum(signal.samples);
   const decoded=signalTrusted?infer(signal.samples,MODEL):{quality:q,label:null,probabilities:null};
   signalAnalysis={...decoded,spectrum:sp};
-  $('source-label').textContent=signalTrusted?'SYNTHETIC EEG':'IMPORTED · LOCAL ONLY';
-  $('seed-label').textContent=signalTrusted?`SEED ${signalSeed} · 128 Hz · 2 s`:'128 Hz · 2 s · IMPORT';
+  $('source-label').textContent=signalMode==='recorded'?'RECORDED EEG · PHYSIONET':signalTrusted?'SYNTHETIC EEG':'IMPORTED · LOCAL ONLY';
+  $('seed-label').textContent=signalMode==='recorded'?`${REAL_EXAMPLE.provenance.epoch_id} · 128 Hz`:signalTrusted?`SEED ${signalSeed} · 128 Hz · 2 s`:'128 Hz · 2 s · IMPORT';
+  $('recorded-note').hidden=signalMode!=='recorded';
+  $('condition').disabled=signalMode!=='synthetic';$('artifact').disabled=signalMode!=='synthetic';$('new-window').disabled=signalMode!=='synthetic';
+  $('recorded-window').setAttribute('aria-pressed',String(signalMode==='recorded'));
+  $('synthetic-replay').setAttribute('aria-pressed',String(signalMode==='synthetic'));
   $('quality-label').dataset.state=q.usable?'usable':'blocked';
   $('quality-label').textContent=q.usable?'Usable demo window':'Abstain';
   $('quality-detail').textContent=q.usable?'No flat channel or amplitude flag detected.':q.reasons.join(' · ');
   $('prediction').textContent=decoded.label==null?'No prediction':MODEL.classes[decoded.label];
-  $('prediction-detail').textContent=!signalTrusted?'The synthetic-only model is disabled for imported data.':!q.usable?'Quality gate blocked inference.':`Softmax score: ${(Math.max(...decoded.probabilities)*100).toFixed(1)}%. Uncalibrated; not a clinical confidence score.`;
+  $('prediction-detail').textContent=signalMode==='recorded'?'Recorded EEG analysis. Real-model evaluation appears in the evidence table below.':!signalTrusted?'The synthetic-only model is disabled for imported data.':!q.usable?'Quality gate blocked inference.':`Softmax score: ${(Math.max(...decoded.probabilities)*100).toFixed(1)}%. Uncalibrated; not a clinical confidence score.`;
   const distances=MODEL.baseline_centres.map(v=>Math.abs(sp.feature-v)),base=distances[1]<distances[0]?1:0;
   $('baseline').textContent=q.usable&&signalTrusted?MODEL.classes[base]:'No prediction';
   $('baseline-detail').textContent=q.usable?`8–13 Hz power: ${sp.alpha.toFixed(1)} µV² · 13–30 Hz power: ${sp.beta.toFixed(1)} µV²`:'Inspect the raw waveform before interpreting its spectrum.';
   plotSignal();recordObservation();
 }
 function regenerate(){
-  signalSeed+=17;signal=makeWindow(signalSeed,Number($('condition').value),$('artifact').value);signalTrusted=true;$('import-status').textContent='';renderSignal();
+  signalSeed+=17;signal=makeWindow(signalSeed,Number($('condition').value),$('artifact').value);signalTrusted=true;signalMode='synthetic';$('import-status').textContent='';renderSignal();
 }
+function loadRecorded(){
+  signal={schema:'neuroweave.eeg.v1',source:'physionet-eegmmidb',sample_rate_hz:128,unit:'uV',
+    channels:[...REAL_EXAMPLE.channels],samples:REAL_EXAMPLE.samples.map(c=>[...c]),
+    provenance:structuredClone(REAL_EXAMPLE.provenance),dataset_doi:REAL_EXAMPLE.dataset_doi,
+    license:REAL_EXAMPLE.license,preprocessing:structuredClone(REAL_EXAMPLE.preprocessing)};
+  signalTrusted=false;signalMode='recorded';$('import-status').textContent='Public recorded trial · common-average reference · 1–40 Hz offline filter · classification available through the Python benchmark.';renderSignal();
+}
+$('recorded-window').addEventListener('click',loadRecorded);
+$('synthetic-replay').addEventListener('click',regenerate);
 $('new-window').addEventListener('click',regenerate);
 $('condition').addEventListener('change',regenerate);
 $('artifact').addEventListener('change',regenerate);
@@ -164,10 +182,23 @@ $('import-window').addEventListener('change',async e=>{
   const file=e.target.files?.[0];if(!file)return;
   try{
     if(file.size>500000)throw new Error('Please use a JSON file smaller than 500 KB.');
-    const parsed=JSON.parse(await file.text());signal=validateWindow(parsed);signalTrusted=false;renderSignal();
+    const parsed=JSON.parse(await file.text());signal=validateWindow(parsed);signalTrusted=false;signalMode='imported';renderSignal();
     $('import-status').textContent='Imported locally. Quality and spectral analysis are available; classification is disabled.';
   }catch(error){$('import-status').textContent=`Import rejected: ${error.message}`;}
   e.target.value='';
 });
 $('benchmark-score').textContent=`${(BENCH.cnn.balanced_accuracy*100).toFixed(0)}% / ${(BENCH.spectral_baseline.balanced_accuracy*100).toFixed(0)}%`;
-renderSignal();renderGame();
+const realNames={bandpower_logistic:'Band power + logistic',csp_lda:'CSP + shrinkage LDA',cnn_ensemble:'Compact CNN · 3 seeds'};
+const realRows=$('real-results');realRows.replaceChildren();
+for(const [name,metric] of Object.entries(REAL_BENCH.models)){
+  const row=document.createElement('tr');
+  const interval=metric.subject_bootstrap_95_ci.map(v=>(v*100).toFixed(1)+'%').join('–');
+  for(const value of [realNames[name],(metric.subject_macro_balanced_accuracy*100).toFixed(1)+'%',interval]){
+    const cell=document.createElement('td');cell.textContent=value;row.append(cell);
+  }
+  realRows.append(row);
+}
+const q=REAL_BENCH.quality,testSplit=REAL_BENCH.splits.test;
+$('real-cohort').textContent=`${q.accepted_epochs} accepted trials / ${q.rejected_epochs} rejected / ${testSplit.epochs} test trials from ${testSplit.subjects.length} unseen people`;
+$('real-subjects').textContent=testSplit.subjects.map(s=>'S'+String(s).padStart(3,'0')).join(' · ');
+loadRecorded();renderGame();
